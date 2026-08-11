@@ -27,6 +27,8 @@ import { Route as AdminSubmissionsRouteImport } from './routes/admin.submissions
 import { Route as AdminTeamsRouteImport } from './routes/admin.teams'
 import { Route as HackathonsIndexRouteImport } from './routes/hackathons.index'
 import { Route as HackathonsHackathonIdRouteImport } from './routes/hackathons.$hackathonId'
+import { Route as JudgeIndexRouteImport } from './routes/judge.index'
+import { Route as JudgeAssignedRouteImport } from './routes/judge.assigned'
 import { Route as JudgeProfileRouteImport } from './routes/judge.profile'
 import { Route as ParticipantIndexRouteImport } from './routes/participant.index'
 import { Route as ParticipantFindTeamsRouteImport } from './routes/participant.find-teams'
@@ -35,6 +37,7 @@ import { Route as ParticipantProfileRouteImport } from './routes/participant.pro
 import { Route as ParticipantResultsRouteImport } from './routes/participant.results'
 import { Route as ParticipantSubmissionRouteImport } from './routes/participant.submission'
 import { Route as ParticipantTeamRouteImport } from './routes/participant.team'
+import { Route as JudgeEvaluationSubmissionIdRouteImport } from './routes/judge.evaluation.$submissionId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -126,6 +129,16 @@ const HackathonsHackathonIdRoute = HackathonsHackathonIdRouteImport.update({
   path: '/hackathons/$hackathonId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const JudgeIndexRoute = JudgeIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => JudgeRoute,
+} as any)
+const JudgeAssignedRoute = JudgeAssignedRouteImport.update({
+  id: '/assigned',
+  path: '/assigned',
+  getParentRoute: () => JudgeRoute,
+} as any)
 const JudgeProfileRoute = JudgeProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -166,6 +179,12 @@ const ParticipantTeamRoute = ParticipantTeamRouteImport.update({
   path: '/team',
   getParentRoute: () => ParticipantRoute,
 } as any)
+const JudgeEvaluationSubmissionIdRoute =
+  JudgeEvaluationSubmissionIdRouteImport.update({
+    id: '/evaluation/$submissionId',
+    path: '/evaluation/$submissionId',
+    getParentRoute: () => JudgeRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -184,6 +203,7 @@ export interface FileRoutesByFullPath {
   '/admin/submissions': typeof AdminSubmissionsRoute
   '/admin/teams': typeof AdminTeamsRoute
   '/hackathons/$hackathonId': typeof HackathonsHackathonIdRoute
+  '/judge/assigned': typeof JudgeAssignedRoute
   '/judge/profile': typeof JudgeProfileRoute
   '/participant/find-teams': typeof ParticipantFindTeamsRoute
   '/participant/hackathons': typeof ParticipantHackathonsRoute
@@ -193,12 +213,13 @@ export interface FileRoutesByFullPath {
   '/participant/team': typeof ParticipantTeamRoute
   '/admin/': typeof AdminIndexRoute
   '/hackathons/': typeof HackathonsIndexRoute
+  '/judge/': typeof JudgeIndexRoute
   '/participant/': typeof ParticipantIndexRoute
+  '/judge/evaluation/$submissionId': typeof JudgeEvaluationSubmissionIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/judge': typeof JudgeRouteWithChildren
   '/leaderboard': typeof LeaderboardRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
@@ -210,6 +231,7 @@ export interface FileRoutesByTo {
   '/admin/submissions': typeof AdminSubmissionsRoute
   '/admin/teams': typeof AdminTeamsRoute
   '/hackathons/$hackathonId': typeof HackathonsHackathonIdRoute
+  '/judge/assigned': typeof JudgeAssignedRoute
   '/judge/profile': typeof JudgeProfileRoute
   '/participant/find-teams': typeof ParticipantFindTeamsRoute
   '/participant/hackathons': typeof ParticipantHackathonsRoute
@@ -219,7 +241,9 @@ export interface FileRoutesByTo {
   '/participant/team': typeof ParticipantTeamRoute
   '/admin': typeof AdminIndexRoute
   '/hackathons': typeof HackathonsIndexRoute
+  '/judge': typeof JudgeIndexRoute
   '/participant': typeof ParticipantIndexRoute
+  '/judge/evaluation/$submissionId': typeof JudgeEvaluationSubmissionIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -239,6 +263,7 @@ export interface FileRoutesById {
   '/admin/submissions': typeof AdminSubmissionsRoute
   '/admin/teams': typeof AdminTeamsRoute
   '/hackathons/$hackathonId': typeof HackathonsHackathonIdRoute
+  '/judge/assigned': typeof JudgeAssignedRoute
   '/judge/profile': typeof JudgeProfileRoute
   '/participant/find-teams': typeof ParticipantFindTeamsRoute
   '/participant/hackathons': typeof ParticipantHackathonsRoute
@@ -248,7 +273,9 @@ export interface FileRoutesById {
   '/participant/team': typeof ParticipantTeamRoute
   '/admin/': typeof AdminIndexRoute
   '/hackathons/': typeof HackathonsIndexRoute
+  '/judge/': typeof JudgeIndexRoute
   '/participant/': typeof ParticipantIndexRoute
+  '/judge/evaluation/$submissionId': typeof JudgeEvaluationSubmissionIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -269,6 +296,7 @@ export interface FileRouteTypes {
     | '/admin/submissions'
     | '/admin/teams'
     | '/hackathons/$hackathonId'
+    | '/judge/assigned'
     | '/judge/profile'
     | '/participant/find-teams'
     | '/participant/hackathons'
@@ -278,12 +306,13 @@ export interface FileRouteTypes {
     | '/participant/team'
     | '/admin/'
     | '/hackathons/'
+    | '/judge/'
     | '/participant/'
+    | '/judge/evaluation/$submissionId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
-    | '/judge'
     | '/leaderboard'
     | '/login'
     | '/register'
@@ -295,6 +324,7 @@ export interface FileRouteTypes {
     | '/admin/submissions'
     | '/admin/teams'
     | '/hackathons/$hackathonId'
+    | '/judge/assigned'
     | '/judge/profile'
     | '/participant/find-teams'
     | '/participant/hackathons'
@@ -304,7 +334,9 @@ export interface FileRouteTypes {
     | '/participant/team'
     | '/admin'
     | '/hackathons'
+    | '/judge'
     | '/participant'
+    | '/judge/evaluation/$submissionId'
   id:
     | '__root__'
     | '/'
@@ -323,6 +355,7 @@ export interface FileRouteTypes {
     | '/admin/submissions'
     | '/admin/teams'
     | '/hackathons/$hackathonId'
+    | '/judge/assigned'
     | '/judge/profile'
     | '/participant/find-teams'
     | '/participant/hackathons'
@@ -332,7 +365,9 @@ export interface FileRouteTypes {
     | '/participant/team'
     | '/admin/'
     | '/hackathons/'
+    | '/judge/'
     | '/participant/'
+    | '/judge/evaluation/$submissionId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -476,6 +511,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HackathonsHackathonIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/judge/': {
+      id: '/judge/'
+      path: '/'
+      fullPath: '/judge/'
+      preLoaderRoute: typeof JudgeIndexRouteImport
+      parentRoute: typeof JudgeRoute
+    }
+    '/judge/assigned': {
+      id: '/judge/assigned'
+      path: '/assigned'
+      fullPath: '/judge/assigned'
+      preLoaderRoute: typeof JudgeAssignedRouteImport
+      parentRoute: typeof JudgeRoute
+    }
     '/judge/profile': {
       id: '/judge/profile'
       path: '/profile'
@@ -532,6 +581,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ParticipantTeamRouteImport
       parentRoute: typeof ParticipantRoute
     }
+    '/judge/evaluation/$submissionId': {
+      id: '/judge/evaluation/$submissionId'
+      path: '/evaluation/$submissionId'
+      fullPath: '/judge/evaluation/$submissionId'
+      preLoaderRoute: typeof JudgeEvaluationSubmissionIdRouteImport
+      parentRoute: typeof JudgeRoute
+    }
   }
 }
 
@@ -560,11 +616,17 @@ const AdminRouteChildren: AdminRouteChildren = {
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface JudgeRouteChildren {
+  JudgeAssignedRoute: typeof JudgeAssignedRoute
   JudgeProfileRoute: typeof JudgeProfileRoute
+  JudgeIndexRoute: typeof JudgeIndexRoute
+  JudgeEvaluationSubmissionIdRoute: typeof JudgeEvaluationSubmissionIdRoute
 }
 
 const JudgeRouteChildren: JudgeRouteChildren = {
+  JudgeAssignedRoute: JudgeAssignedRoute,
   JudgeProfileRoute: JudgeProfileRoute,
+  JudgeIndexRoute: JudgeIndexRoute,
+  JudgeEvaluationSubmissionIdRoute: JudgeEvaluationSubmissionIdRoute,
 }
 
 const JudgeRouteWithChildren = JudgeRoute._addFileChildren(JudgeRouteChildren)
@@ -608,3 +670,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
