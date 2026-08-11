@@ -65,7 +65,14 @@ function JudgeEvaluation() {
           className="surface-card space-y-7 rounded-2xl p-6"
           onSubmit={async (e) => {
             e.preventDefault();
-            await evaluationService.submit({ submissionId, scores, feedback, total });
+            await evaluationService.submit({
+              submissionId,
+              innovation: scores.innovation ?? 0,
+              technical: scores.technical ?? 0,
+              impact: scores.impact ?? 0,
+              presentation: scores.presentation ?? 0,
+              feedback,
+            });
             toast.success("Evaluation submitted");
             navigate({ to: "/judge/assigned" });
           }}
