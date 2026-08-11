@@ -10,33 +10,342 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AboutRouteImport } from './routes/about'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as JudgeRouteImport } from './routes/judge'
+import { Route as LeaderboardRouteImport } from './routes/leaderboard'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as ParticipantRouteImport } from './routes/participant'
+import { Route as RegisterRouteImport } from './routes/register'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AdminHackathonsRouteImport } from './routes/admin.hackathons'
+import { Route as AdminJudgesRouteImport } from './routes/admin.judges'
+import { Route as AdminParticipantsRouteImport } from './routes/admin.participants'
+import { Route as AdminResultsRouteImport } from './routes/admin.results'
+import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
+import { Route as AdminSubmissionsRouteImport } from './routes/admin.submissions'
+import { Route as AdminTeamsRouteImport } from './routes/admin.teams'
+import { Route as HackathonsIndexRouteImport } from './routes/hackathons.index'
+import { Route as HackathonsHackathonIdRouteImport } from './routes/hackathons.$hackathonId'
+import { Route as JudgeProfileRouteImport } from './routes/judge.profile'
+import { Route as ParticipantIndexRouteImport } from './routes/participant.index'
+import { Route as ParticipantFindTeamsRouteImport } from './routes/participant.find-teams'
+import { Route as ParticipantHackathonsRouteImport } from './routes/participant.hackathons'
+import { Route as ParticipantProfileRouteImport } from './routes/participant.profile'
+import { Route as ParticipantResultsRouteImport } from './routes/participant.results'
+import { Route as ParticipantSubmissionRouteImport } from './routes/participant.submission'
+import { Route as ParticipantTeamRouteImport } from './routes/participant.team'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JudgeRoute = JudgeRouteImport.update({
+  id: '/judge',
+  path: '/judge',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LeaderboardRoute = LeaderboardRouteImport.update({
+  id: '/leaderboard',
+  path: '/leaderboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ParticipantRoute = ParticipantRouteImport.update({
+  id: '/participant',
+  path: '/participant',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminHackathonsRoute = AdminHackathonsRouteImport.update({
+  id: '/hackathons',
+  path: '/hackathons',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminJudgesRoute = AdminJudgesRouteImport.update({
+  id: '/judges',
+  path: '/judges',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminParticipantsRoute = AdminParticipantsRouteImport.update({
+  id: '/participants',
+  path: '/participants',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminResultsRoute = AdminResultsRouteImport.update({
+  id: '/results',
+  path: '/results',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSettingsRoute = AdminSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSubmissionsRoute = AdminSubmissionsRouteImport.update({
+  id: '/submissions',
+  path: '/submissions',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminTeamsRoute = AdminTeamsRouteImport.update({
+  id: '/teams',
+  path: '/teams',
+  getParentRoute: () => AdminRoute,
+} as any)
+const HackathonsIndexRoute = HackathonsIndexRouteImport.update({
+  id: '/hackathons/',
+  path: '/hackathons/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HackathonsHackathonIdRoute = HackathonsHackathonIdRouteImport.update({
+  id: '/hackathons/$hackathonId',
+  path: '/hackathons/$hackathonId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JudgeProfileRoute = JudgeProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => JudgeRoute,
+} as any)
+const ParticipantIndexRoute = ParticipantIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ParticipantRoute,
+} as any)
+const ParticipantFindTeamsRoute = ParticipantFindTeamsRouteImport.update({
+  id: '/find-teams',
+  path: '/find-teams',
+  getParentRoute: () => ParticipantRoute,
+} as any)
+const ParticipantHackathonsRoute = ParticipantHackathonsRouteImport.update({
+  id: '/hackathons',
+  path: '/hackathons',
+  getParentRoute: () => ParticipantRoute,
+} as any)
+const ParticipantProfileRoute = ParticipantProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => ParticipantRoute,
+} as any)
+const ParticipantResultsRoute = ParticipantResultsRouteImport.update({
+  id: '/results',
+  path: '/results',
+  getParentRoute: () => ParticipantRoute,
+} as any)
+const ParticipantSubmissionRoute = ParticipantSubmissionRouteImport.update({
+  id: '/submission',
+  path: '/submission',
+  getParentRoute: () => ParticipantRoute,
+} as any)
+const ParticipantTeamRoute = ParticipantTeamRouteImport.update({
+  id: '/team',
+  path: '/team',
+  getParentRoute: () => ParticipantRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/admin': typeof AdminRouteWithChildren
+  '/judge': typeof JudgeRouteWithChildren
+  '/leaderboard': typeof LeaderboardRoute
+  '/login': typeof LoginRoute
+  '/participant': typeof ParticipantRouteWithChildren
+  '/register': typeof RegisterRoute
+  '/admin/hackathons': typeof AdminHackathonsRoute
+  '/admin/judges': typeof AdminJudgesRoute
+  '/admin/participants': typeof AdminParticipantsRoute
+  '/admin/results': typeof AdminResultsRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/submissions': typeof AdminSubmissionsRoute
+  '/admin/teams': typeof AdminTeamsRoute
+  '/hackathons/$hackathonId': typeof HackathonsHackathonIdRoute
+  '/judge/profile': typeof JudgeProfileRoute
+  '/participant/find-teams': typeof ParticipantFindTeamsRoute
+  '/participant/hackathons': typeof ParticipantHackathonsRoute
+  '/participant/profile': typeof ParticipantProfileRoute
+  '/participant/results': typeof ParticipantResultsRoute
+  '/participant/submission': typeof ParticipantSubmissionRoute
+  '/participant/team': typeof ParticipantTeamRoute
+  '/admin/': typeof AdminIndexRoute
+  '/hackathons/': typeof HackathonsIndexRoute
+  '/participant/': typeof ParticipantIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/judge': typeof JudgeRouteWithChildren
+  '/leaderboard': typeof LeaderboardRoute
+  '/login': typeof LoginRoute
+  '/register': typeof RegisterRoute
+  '/admin/hackathons': typeof AdminHackathonsRoute
+  '/admin/judges': typeof AdminJudgesRoute
+  '/admin/participants': typeof AdminParticipantsRoute
+  '/admin/results': typeof AdminResultsRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/submissions': typeof AdminSubmissionsRoute
+  '/admin/teams': typeof AdminTeamsRoute
+  '/hackathons/$hackathonId': typeof HackathonsHackathonIdRoute
+  '/judge/profile': typeof JudgeProfileRoute
+  '/participant/find-teams': typeof ParticipantFindTeamsRoute
+  '/participant/hackathons': typeof ParticipantHackathonsRoute
+  '/participant/profile': typeof ParticipantProfileRoute
+  '/participant/results': typeof ParticipantResultsRoute
+  '/participant/submission': typeof ParticipantSubmissionRoute
+  '/participant/team': typeof ParticipantTeamRoute
+  '/admin': typeof AdminIndexRoute
+  '/hackathons': typeof HackathonsIndexRoute
+  '/participant': typeof ParticipantIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/admin': typeof AdminRouteWithChildren
+  '/judge': typeof JudgeRouteWithChildren
+  '/leaderboard': typeof LeaderboardRoute
+  '/login': typeof LoginRoute
+  '/participant': typeof ParticipantRouteWithChildren
+  '/register': typeof RegisterRoute
+  '/admin/hackathons': typeof AdminHackathonsRoute
+  '/admin/judges': typeof AdminJudgesRoute
+  '/admin/participants': typeof AdminParticipantsRoute
+  '/admin/results': typeof AdminResultsRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/submissions': typeof AdminSubmissionsRoute
+  '/admin/teams': typeof AdminTeamsRoute
+  '/hackathons/$hackathonId': typeof HackathonsHackathonIdRoute
+  '/judge/profile': typeof JudgeProfileRoute
+  '/participant/find-teams': typeof ParticipantFindTeamsRoute
+  '/participant/hackathons': typeof ParticipantHackathonsRoute
+  '/participant/profile': typeof ParticipantProfileRoute
+  '/participant/results': typeof ParticipantResultsRoute
+  '/participant/submission': typeof ParticipantSubmissionRoute
+  '/participant/team': typeof ParticipantTeamRoute
+  '/admin/': typeof AdminIndexRoute
+  '/hackathons/': typeof HackathonsIndexRoute
+  '/participant/': typeof ParticipantIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/about'
+    | '/admin'
+    | '/judge'
+    | '/leaderboard'
+    | '/login'
+    | '/participant'
+    | '/register'
+    | '/admin/hackathons'
+    | '/admin/judges'
+    | '/admin/participants'
+    | '/admin/results'
+    | '/admin/settings'
+    | '/admin/submissions'
+    | '/admin/teams'
+    | '/hackathons/$hackathonId'
+    | '/judge/profile'
+    | '/participant/find-teams'
+    | '/participant/hackathons'
+    | '/participant/profile'
+    | '/participant/results'
+    | '/participant/submission'
+    | '/participant/team'
+    | '/admin/'
+    | '/hackathons/'
+    | '/participant/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/about'
+    | '/judge'
+    | '/leaderboard'
+    | '/login'
+    | '/register'
+    | '/admin/hackathons'
+    | '/admin/judges'
+    | '/admin/participants'
+    | '/admin/results'
+    | '/admin/settings'
+    | '/admin/submissions'
+    | '/admin/teams'
+    | '/hackathons/$hackathonId'
+    | '/judge/profile'
+    | '/participant/find-teams'
+    | '/participant/hackathons'
+    | '/participant/profile'
+    | '/participant/results'
+    | '/participant/submission'
+    | '/participant/team'
+    | '/admin'
+    | '/hackathons'
+    | '/participant'
+  id:
+    | '__root__'
+    | '/'
+    | '/about'
+    | '/admin'
+    | '/judge'
+    | '/leaderboard'
+    | '/login'
+    | '/participant'
+    | '/register'
+    | '/admin/hackathons'
+    | '/admin/judges'
+    | '/admin/participants'
+    | '/admin/results'
+    | '/admin/settings'
+    | '/admin/submissions'
+    | '/admin/teams'
+    | '/hackathons/$hackathonId'
+    | '/judge/profile'
+    | '/participant/find-teams'
+    | '/participant/hackathons'
+    | '/participant/profile'
+    | '/participant/results'
+    | '/participant/submission'
+    | '/participant/team'
+    | '/admin/'
+    | '/hackathons/'
+    | '/participant/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
+  AdminRoute: typeof AdminRouteWithChildren
+  JudgeRoute: typeof JudgeRouteWithChildren
+  LeaderboardRoute: typeof LeaderboardRoute
+  LoginRoute: typeof LoginRoute
+  ParticipantRoute: typeof ParticipantRouteWithChildren
+  RegisterRoute: typeof RegisterRoute
+  HackathonsHackathonIdRoute: typeof HackathonsHackathonIdRoute
+  HackathonsIndexRoute: typeof HackathonsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,22 +357,254 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/judge': {
+      id: '/judge'
+      path: '/judge'
+      fullPath: '/judge'
+      preLoaderRoute: typeof JudgeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/leaderboard': {
+      id: '/leaderboard'
+      path: '/leaderboard'
+      fullPath: '/leaderboard'
+      preLoaderRoute: typeof LeaderboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/participant': {
+      id: '/participant'
+      path: '/participant'
+      fullPath: '/participant'
+      preLoaderRoute: typeof ParticipantRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/hackathons': {
+      id: '/admin/hackathons'
+      path: '/hackathons'
+      fullPath: '/admin/hackathons'
+      preLoaderRoute: typeof AdminHackathonsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/judges': {
+      id: '/admin/judges'
+      path: '/judges'
+      fullPath: '/admin/judges'
+      preLoaderRoute: typeof AdminJudgesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/participants': {
+      id: '/admin/participants'
+      path: '/participants'
+      fullPath: '/admin/participants'
+      preLoaderRoute: typeof AdminParticipantsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/results': {
+      id: '/admin/results'
+      path: '/results'
+      fullPath: '/admin/results'
+      preLoaderRoute: typeof AdminResultsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/settings': {
+      id: '/admin/settings'
+      path: '/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/submissions': {
+      id: '/admin/submissions'
+      path: '/submissions'
+      fullPath: '/admin/submissions'
+      preLoaderRoute: typeof AdminSubmissionsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/teams': {
+      id: '/admin/teams'
+      path: '/teams'
+      fullPath: '/admin/teams'
+      preLoaderRoute: typeof AdminTeamsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/hackathons/': {
+      id: '/hackathons/'
+      path: '/hackathons'
+      fullPath: '/hackathons/'
+      preLoaderRoute: typeof HackathonsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hackathons/$hackathonId': {
+      id: '/hackathons/$hackathonId'
+      path: '/hackathons/$hackathonId'
+      fullPath: '/hackathons/$hackathonId'
+      preLoaderRoute: typeof HackathonsHackathonIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/judge/profile': {
+      id: '/judge/profile'
+      path: '/profile'
+      fullPath: '/judge/profile'
+      preLoaderRoute: typeof JudgeProfileRouteImport
+      parentRoute: typeof JudgeRoute
+    }
+    '/participant/': {
+      id: '/participant/'
+      path: '/'
+      fullPath: '/participant/'
+      preLoaderRoute: typeof ParticipantIndexRouteImport
+      parentRoute: typeof ParticipantRoute
+    }
+    '/participant/find-teams': {
+      id: '/participant/find-teams'
+      path: '/find-teams'
+      fullPath: '/participant/find-teams'
+      preLoaderRoute: typeof ParticipantFindTeamsRouteImport
+      parentRoute: typeof ParticipantRoute
+    }
+    '/participant/hackathons': {
+      id: '/participant/hackathons'
+      path: '/hackathons'
+      fullPath: '/participant/hackathons'
+      preLoaderRoute: typeof ParticipantHackathonsRouteImport
+      parentRoute: typeof ParticipantRoute
+    }
+    '/participant/profile': {
+      id: '/participant/profile'
+      path: '/profile'
+      fullPath: '/participant/profile'
+      preLoaderRoute: typeof ParticipantProfileRouteImport
+      parentRoute: typeof ParticipantRoute
+    }
+    '/participant/results': {
+      id: '/participant/results'
+      path: '/results'
+      fullPath: '/participant/results'
+      preLoaderRoute: typeof ParticipantResultsRouteImport
+      parentRoute: typeof ParticipantRoute
+    }
+    '/participant/submission': {
+      id: '/participant/submission'
+      path: '/submission'
+      fullPath: '/participant/submission'
+      preLoaderRoute: typeof ParticipantSubmissionRouteImport
+      parentRoute: typeof ParticipantRoute
+    }
+    '/participant/team': {
+      id: '/participant/team'
+      path: '/team'
+      fullPath: '/participant/team'
+      preLoaderRoute: typeof ParticipantTeamRouteImport
+      parentRoute: typeof ParticipantRoute
+    }
   }
 }
 
+interface AdminRouteChildren {
+  AdminHackathonsRoute: typeof AdminHackathonsRoute
+  AdminJudgesRoute: typeof AdminJudgesRoute
+  AdminParticipantsRoute: typeof AdminParticipantsRoute
+  AdminResultsRoute: typeof AdminResultsRoute
+  AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminSubmissionsRoute: typeof AdminSubmissionsRoute
+  AdminTeamsRoute: typeof AdminTeamsRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminHackathonsRoute: AdminHackathonsRoute,
+  AdminJudgesRoute: AdminJudgesRoute,
+  AdminParticipantsRoute: AdminParticipantsRoute,
+  AdminResultsRoute: AdminResultsRoute,
+  AdminSettingsRoute: AdminSettingsRoute,
+  AdminSubmissionsRoute: AdminSubmissionsRoute,
+  AdminTeamsRoute: AdminTeamsRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
+interface JudgeRouteChildren {
+  JudgeProfileRoute: typeof JudgeProfileRoute
+}
+
+const JudgeRouteChildren: JudgeRouteChildren = {
+  JudgeProfileRoute: JudgeProfileRoute,
+}
+
+const JudgeRouteWithChildren = JudgeRoute._addFileChildren(JudgeRouteChildren)
+
+interface ParticipantRouteChildren {
+  ParticipantFindTeamsRoute: typeof ParticipantFindTeamsRoute
+  ParticipantHackathonsRoute: typeof ParticipantHackathonsRoute
+  ParticipantProfileRoute: typeof ParticipantProfileRoute
+  ParticipantResultsRoute: typeof ParticipantResultsRoute
+  ParticipantSubmissionRoute: typeof ParticipantSubmissionRoute
+  ParticipantTeamRoute: typeof ParticipantTeamRoute
+  ParticipantIndexRoute: typeof ParticipantIndexRoute
+}
+
+const ParticipantRouteChildren: ParticipantRouteChildren = {
+  ParticipantFindTeamsRoute: ParticipantFindTeamsRoute,
+  ParticipantHackathonsRoute: ParticipantHackathonsRoute,
+  ParticipantProfileRoute: ParticipantProfileRoute,
+  ParticipantResultsRoute: ParticipantResultsRoute,
+  ParticipantSubmissionRoute: ParticipantSubmissionRoute,
+  ParticipantTeamRoute: ParticipantTeamRoute,
+  ParticipantIndexRoute: ParticipantIndexRoute,
+}
+
+const ParticipantRouteWithChildren = ParticipantRoute._addFileChildren(
+  ParticipantRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
+  AdminRoute: AdminRouteWithChildren,
+  JudgeRoute: JudgeRouteWithChildren,
+  LeaderboardRoute: LeaderboardRoute,
+  LoginRoute: LoginRoute,
+  ParticipantRoute: ParticipantRouteWithChildren,
+  RegisterRoute: RegisterRoute,
+  HackathonsHackathonIdRoute: HackathonsHackathonIdRoute,
+  HackathonsIndexRoute: HackathonsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
