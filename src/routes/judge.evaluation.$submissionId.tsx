@@ -67,10 +67,10 @@ function JudgeEvaluation() {
             e.preventDefault();
             await evaluationService.submit({
               submissionId,
-              innovation: scores.innovation ?? 0,
-              technical: scores.technical ?? 0,
-              impact: scores.impact ?? 0,
-              presentation: scores.presentation ?? 0,
+              innovation: scores['innovation'] ?? 0,
+              technical: scores['technical'] ?? 0,
+              impact: scores['impact'] ?? 0,
+              presentation: scores['presentation'] ?? 0,
               feedback,
             });
             toast.success("Evaluation submitted");
