@@ -83,7 +83,7 @@ function JudgeAssigned() {
             <p className="mt-3 line-clamp-3 text-sm text-muted-foreground">{s.description}</p>
 
             <div className="mt-4 flex flex-wrap gap-2">
-              {s.techStack.map((t) => (
+              {s.technologies.map((t: string) => (
                 <span
                   key={t}
                   className="rounded-full border border-border bg-muted px-2.5 py-1 text-xs text-muted-foreground"

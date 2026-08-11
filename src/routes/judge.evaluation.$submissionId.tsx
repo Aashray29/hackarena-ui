@@ -117,7 +117,7 @@ function JudgeEvaluation() {
             <h2 className="font-display text-lg font-semibold">Project details</h2>
             <p className="mt-3 text-sm text-muted-foreground">{submission.description}</p>
             <div className="mt-4 flex flex-wrap gap-2">
-              {submission.techStack.map((t) => (
+              {submission.technologies.map((t: string) => (
                 <span
                   key={t}
                   className="rounded-full border border-border bg-muted px-2.5 py-1 text-xs text-muted-foreground"
