@@ -1,0 +1,215 @@
+//#region node_modules/.nitro/vite/services/ssr/assets/mockEvaluations-Ukch97-E.js
+var mockEvaluations = [
+	{
+		id: "e-001",
+		submissionId: "s-001",
+		projectName: "CampusPulse",
+		teamName: "Byte Rangers",
+		hackathonName: "CodeStorm 2026",
+		judgeId: "j-001",
+		judgeName: "Dr. Vikram Suresh",
+		innovation: 22,
+		technical: 24,
+		presentation: 23,
+		impact: 22,
+		total: 91,
+		rank: 1,
+		feedback: "Exceptionally well-scoped product with a genuinely usable interface. The MySQL schema is normalised and the real-time layer is handled cleanly. Consider adding role-based access before a campus pilot."
+	},
+	{
+		id: "e-002",
+		submissionId: "s-005",
+		projectName: "TransitSense",
+		teamName: "Urban Loop",
+		hackathonName: "SmartCity Hack",
+		judgeId: "j-003",
+		judgeName: "Rahul Pillai",
+		innovation: 23,
+		technical: 21,
+		presentation: 22,
+		impact: 22,
+		total: 88,
+		rank: 2,
+		feedback: "Strong use of open municipal data and a convincing crowding model. The demo would benefit from clearer confidence intervals on predictions."
+	},
+	{
+		id: "e-003",
+		submissionId: "s-003",
+		projectName: "DevBoard",
+		teamName: "Stack Overflowers",
+		hackathonName: "DevFest Code Rush",
+		judgeId: "j-002",
+		judgeName: "Ananya Gupta",
+		innovation: 21,
+		technical: 23,
+		presentation: 20,
+		impact: 22,
+		total: 86,
+		rank: 3,
+		feedback: "Delightful keyboard-first experience and a very fast client. Onboarding for non-terminal users is the biggest gap right now."
+	}
+];
+var mockLeaderboard = [
+	{
+		rank: 1,
+		teamName: "Byte Rangers",
+		projectName: "CampusPulse",
+		hackathonId: "hk-001",
+		hackathonName: "CodeStorm 2026",
+		score: 91,
+		college: "PSG College of Technology"
+	},
+	{
+		rank: 2,
+		teamName: "Urban Loop",
+		projectName: "TransitSense",
+		hackathonId: "hk-004",
+		hackathonName: "SmartCity Hack",
+		score: 88,
+		college: "Anna University"
+	},
+	{
+		rank: 3,
+		teamName: "Stack Overflowers",
+		projectName: "DevBoard",
+		hackathonId: "hk-005",
+		hackathonName: "DevFest Code Rush",
+		score: 86,
+		college: "VIT Vellore"
+	},
+	{
+		rank: 4,
+		teamName: "Chain Reaction",
+		projectName: "ProofPass",
+		hackathonId: "hk-003",
+		hackathonName: "Web3 Builders Jam",
+		score: 83,
+		college: "SRM Institute of Science & Technology"
+	},
+	{
+		rank: 5,
+		teamName: "Neural Nomads",
+		projectName: "MediScan AI",
+		hackathonId: "hk-002",
+		hackathonName: "AI Genesis Sprint",
+		score: 81,
+		college: "IIT Madras"
+	},
+	{
+		rank: 6,
+		teamName: "Quantum Quokkas",
+		projectName: "LabQueue",
+		hackathonId: "hk-001",
+		hackathonName: "CodeStorm 2026",
+		score: 79,
+		college: "NIT Trichy"
+	},
+	{
+		rank: 7,
+		teamName: "Null Pointers",
+		projectName: "SafeStreet",
+		hackathonId: "hk-004",
+		hackathonName: "SmartCity Hack",
+		score: 77,
+		college: "COEP Technological University"
+	},
+	{
+		rank: 8,
+		teamName: "Syntax Society",
+		projectName: "GreenLedger",
+		hackathonId: "hk-005",
+		hackathonName: "DevFest Code Rush",
+		score: 74,
+		college: "CUSAT"
+	}
+];
+var mockActivity = [
+	{
+		id: "ac-1",
+		title: "Project submitted",
+		description: "CampusPulse was submitted for CodeStorm 2026.",
+		time: "2 hours ago",
+		type: "submission"
+	},
+	{
+		id: "ac-2",
+		title: "Rohan Iyer joined your team",
+		description: "Byte Rangers now has 2 of 4 members.",
+		time: "Yesterday",
+		type: "team"
+	},
+	{
+		id: "ac-3",
+		title: "Registered for SmartCity Hack",
+		description: "Your registration was confirmed.",
+		time: "3 days ago",
+		type: "registration"
+	},
+	{
+		id: "ac-4",
+		title: "Results published",
+		description: "DevFest Code Rush results are now available.",
+		time: "1 week ago",
+		type: "result"
+	}
+];
+var participantsPerHackathon = [
+	{
+		name: "CodeStorm",
+		participants: 412
+	},
+	{
+		name: "AI Genesis",
+		participants: 268
+	},
+	{
+		name: "Web3 Jam",
+		participants: 190
+	},
+	{
+		name: "SmartCity",
+		participants: 324
+	},
+	{
+		name: "DevFest",
+		participants: 286
+	}
+];
+var submissionsPerHackathon = [
+	{
+		name: "CodeStorm",
+		submissions: 96
+	},
+	{
+		name: "AI Genesis",
+		submissions: 54
+	},
+	{
+		name: "Web3 Jam",
+		submissions: 41
+	},
+	{
+		name: "SmartCity",
+		submissions: 70
+	},
+	{
+		name: "DevFest",
+		submissions: 68
+	}
+];
+var evaluationStatusBreakdown = [
+	{
+		name: "Evaluated",
+		value: 184
+	},
+	{
+		name: "In Review",
+		value: 76
+	},
+	{
+		name: "Pending",
+		value: 69
+	}
+];
+//#endregion
+export { participantsPerHackathon as a, mockLeaderboard as i, mockActivity as n, submissionsPerHackathon as o, mockEvaluations as r, evaluationStatusBreakdown as t };

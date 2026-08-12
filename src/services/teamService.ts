@@ -1,33 +1,63 @@
-import { currentTeam, mockTeams } from "@/data/mockTeams";
 import type { Team } from "@/types";
-import { delay } from "./apiClient";
+import { apiClient } from "./apiClient";
 
 export const teamService = {
-  list(): Team[] {
-    return mockTeams;
+  async getMyTeam(): Promise<Team | null> {
+    const data = await apiClient.get<{
+      success: boolean;
+      data: Team | null;
+    }>("/teams/my");
+
+    return data.data;
   },
-  getMyTeam(): Team {
-    return currentTeam;
+
+  async list(hackathonId?: string): Promise<Team[]> {
+    const endpoint = hackathonId
+      ? `/teams?hackathon_id=${hackathonId}`
+      : "/teams";
+
+    const data = await apiClient.get<{
+      success: boolean;
+      data: Team[];
+    }>(endpoint);
+
+    return data.data;
   },
-  getById(id: string) {
-    return mockTeams.find((t) => t.id === id);
+
+  async getById(teamId: string) {
+    const data = await apiClient.get(`/teams/${teamId}`);
+
+    return data.data;
   },
-  create(payload: { name: string; hackathonId: string; maxMembers: number }) {
-    return delay({ ok: true, payload });
+
+  async create(payload: {
+    team_name: string;
+    hackathon_id: number;
+  }) {
+    return apiClient.post("/teams", payload);
   },
-  join(code: string) {
-    return delay({ ok: true, code });
+
+  async join(teamId: string) {
+    return apiClient.post(`/teams/${teamId}/join`);
   },
-  invite(email: string) {
-    return delay({ ok: true, email });
+
+  async leave(teamId: string) {
+    return apiClient.delete(`/teams/${teamId}/leave`);
   },
-  leave(teamId: string) {
-    return delay({ ok: true, teamId });
+
+  async invite(teamId: string, userId: number) {
+    return apiClient.post(`/teams/${teamId}/invite`, {
+      user_id: userId,
+    });
   },
-  requestToJoin(teamId: string) {
-    return delay({ ok: true, teamId });
+
+  async removeMember(teamId: string, userId: number) {
+    return apiClient.delete(
+      `/teams/${teamId}/members/${userId}`,
+    );
   },
-  remove(teamId: string) {
-    return delay({ ok: true, teamId });
+
+  async requestToJoin(teamId: string) {
+    return apiClient.post(`/teams/${teamId}/requests`);
   },
 };

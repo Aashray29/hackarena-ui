@@ -1,0 +1,1 @@
+import{t as e}from"./jsx-runtime-B-hcVAMW.js";import{t}from"./ProfileView-DlfMCikc.js";var n=e(),r=()=>(0,n.jsx)(t,{role:`judge`});export{r as component};

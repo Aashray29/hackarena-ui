@@ -1,27 +1,39 @@
-import { mockSubmissions } from "@/data/mockSubmissions";
 import type { Submission } from "@/types";
-import { delay } from "./apiClient";
+import { apiClient } from "./apiClient";
 
-export interface SubmissionDraft {
-  projectName: string;
+export interface SubmissionPayload {
+  team_id: number;
+  project_name: string;
   description: string;
+  github_url: string;
+  demo_url?: string;
   technologies: string;
-  githubUrl: string;
-  demoUrl: string;
-  teamName: string;
 }
 
 export const submissionService = {
-  list(): Submission[] {
-    return mockSubmissions;
+  async getMySubmission(): Promise<Submission | null> {
+    const data = await apiClient.get<{
+      success: boolean;
+      data: Submission | null;
+    }>("/submissions/my");
+
+    return data.data;
   },
-  getById(id: string) {
-    return mockSubmissions.find((s) => s.id === id);
+
+  async getById(id: string) {
+    const data = await apiClient.get(`/submissions/${id}`);
+
+    return data.data;
   },
-  listByJudge(_judgeId: string): Submission[] {
-    return mockSubmissions;
+
+  async create(payload: SubmissionPayload) {
+    return apiClient.post("/submissions", payload);
   },
-  submit(payload: SubmissionDraft) {
-    return delay({ ok: true, payload });
+
+  async update(
+    id: string,
+    payload: Partial<SubmissionPayload>,
+  ) {
+    return apiClient.put(`/submissions/${id}`, payload);
   },
 };

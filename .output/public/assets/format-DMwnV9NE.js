@@ -1,0 +1,1 @@
+function e(e){let t=new Date(e);return Number.isNaN(t.getTime())?e:t.toLocaleDateString(`en-IN`,{day:`2-digit`,month:`short`,year:`numeric`})}function t(e){let t=new Date(e);return Number.isNaN(t.getTime())?e:t.toLocaleString(`en-IN`,{day:`2-digit`,month:`short`,year:`numeric`,hour:`2-digit`,minute:`2-digit`})}export{t as n,e as t};

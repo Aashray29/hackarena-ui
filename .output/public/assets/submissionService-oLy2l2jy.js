@@ -1,0 +1,1 @@
+import{t as e}from"./mockSubmissions-DdkRB3U9.js";import{t}from"./apiClient-yMUavzoE.js";var n={list(){return e},getById(t){return e.find(e=>e.id===t)},listByJudge(t){return e},submit(e){return t({ok:!0,payload:e})}};export{n as t};

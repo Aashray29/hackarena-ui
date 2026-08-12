@@ -1,6 +1,5 @@
 import type { Role } from "@/types";
-
-const API_URL = "http://localhost:5000/api";
+import { apiClient } from "./apiClient";
 
 export interface UserProfile {
   user_id: number;
@@ -12,55 +11,63 @@ export interface UserProfile {
 interface LoginResponse {
   success: boolean;
   message: string;
-  token?: string;
-  user?: UserProfile;
+  token: string;
+  user: UserProfile;
+}
+
+interface MeResponse {
+  success: boolean;
+  user: UserProfile;
 }
 
 export const authService = {
   async login(email: string, password: string) {
-    const response = await fetch(`${API_URL}/auth/login`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+    const data = await apiClient.post<LoginResponse>(
+      "/auth/login",
+      {
         email,
         password,
-      }),
-    });
+      },
+      false,
+    );
 
-    const data: LoginResponse = await response.json();
-
-    if (!response.ok || !data.success) {
-      throw new Error(data.message || "Invalid email or password");
-    }
-
-    if (data.token) {
+    if (typeof window !== "undefined") {
       localStorage.setItem("token", data.token);
-    }
-
-    if (data.user) {
       localStorage.setItem("user", JSON.stringify(data.user));
     }
 
     return data;
   },
 
+  async getMe() {
+    const data = await apiClient.get<MeResponse>("/auth/me");
+
+    if (typeof window !== "undefined") {
+      localStorage.setItem("user", JSON.stringify(data.user));
+    }
+
+    return data.user;
+  },
+
   logout() {
+    if (typeof window === "undefined") return;
+
     localStorage.removeItem("token");
     localStorage.removeItem("user");
   },
 
   getToken() {
+    if (typeof window === "undefined") return null;
+
     return localStorage.getItem("token");
   },
 
   getUser(): UserProfile | null {
+    if (typeof window === "undefined") return null;
+
     const user = localStorage.getItem("user");
 
-    if (!user) {
-      return null;
-    }
+    if (!user) return null;
 
     try {
       return JSON.parse(user);
@@ -70,6 +77,8 @@ export const authService = {
   },
 
   isLoggedIn() {
+    if (typeof window === "undefined") return false;
+
     return !!localStorage.getItem("token");
   },
 };

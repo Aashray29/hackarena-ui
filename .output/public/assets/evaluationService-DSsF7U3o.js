@@ -1,0 +1,1 @@
+import{i as e,r as t}from"./mockEvaluations-C1yWvIJz.js";import{t as n}from"./apiClient-yMUavzoE.js";var r={list(){return t},getBySubmission(e){return t.find(t=>t.submissionId===e)},leaderboard(){return e},submit(e){return n({ok:!0,payload:e})},assign(e){return n({ok:!0,payload:e})}};export{r as t};

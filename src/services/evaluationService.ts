@@ -1,30 +1,48 @@
-import { mockEvaluations, mockLeaderboard } from "@/data/mockEvaluations";
-import type { Evaluation, LeaderboardEntry } from "@/types";
-import { delay } from "./apiClient";
+import { apiClient } from "./apiClient";
 
-export interface EvaluationDraft {
-  submissionId: string;
-  innovation: number;
-  technical: number;
-  presentation: number;
-  impact: number;
-  feedback: string;
+export interface EvaluationPayload {
+  submission_id: number;
+  innovation_score: number;
+  technical_score: number;
+  presentation_score: number;
+  impact_score: number;
+  feedback?: string;
 }
 
 export const evaluationService = {
-  list(): Evaluation[] {
-    return mockEvaluations;
+  async getMyAssignments() {
+    const data = await apiClient.get(
+      "/judge/assignments",
+    );
+
+    return data.data;
   },
-  getBySubmission(submissionId: string) {
-    return mockEvaluations.find((e) => e.submissionId === submissionId);
+
+  async getAssignment(submissionId: string) {
+    const data = await apiClient.get(
+      `/judge/assignments/${submissionId}`,
+    );
+
+    return data.data;
   },
-  leaderboard(): LeaderboardEntry[] {
-    return mockLeaderboard;
+
+  async create(payload: EvaluationPayload) {
+    return apiClient.post("/evaluations", payload);
   },
-  submit(payload: EvaluationDraft) {
-    return delay({ ok: true, payload });
+
+  async getBySubmission(submissionId: string) {
+    const data = await apiClient.get(
+      `/evaluations/submission/${submissionId}`,
+    );
+
+    return data.data;
   },
-  assign(payload: { judgeId: string; hackathonId: string; submissionId: string }) {
-    return delay({ ok: true, payload });
+
+  async getMyEvaluations() {
+    const data = await apiClient.get(
+      "/evaluations/my",
+    );
+
+    return data.data;
   },
 };
