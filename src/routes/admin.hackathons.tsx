@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Plus, Eye, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -33,8 +33,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatDate } from "@/lib/format";
+import { toBackendStatus } from "@/lib/mappers";
 import { hackathonService } from "@/services/hackathonService";
 import { hackathonStatuses } from "@/data/mockHackathons";
+import type { Hackathon, HackathonStatus } from "@/types";
 
 export const Route = createFileRoute("/admin/hackathons")({
   head: () => ({
@@ -49,9 +51,80 @@ export const Route = createFileRoute("/admin/hackathons")({
 });
 
 function AdminHackathons() {
-  const hackathons = hackathonService.list();
+  const [hackathons, setHackathons] = useState<Hackathon[]>([]);
+  const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
-  const [status, setStatus] = useState<string>("Registration Open");
+  const [status, setStatus] = useState<HackathonStatus>("Registration Open");
+  const [form, setForm] = useState({
+    name: "",
+    description: "",
+    startDate: "",
+    endDate: "",
+    deadline: "",
+    minTeam: "2",
+    maxTeam: "4",
+  });
+
+  const loadHackathons = async () => {
+    try {
+      const data = await hackathonService.list();
+      setHackathons(data);
+    } catch (error) {
+      console.error("Failed to load hackathons:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadHackathons();
+  }, []);
+
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      await hackathonService.create({
+        name: form.name,
+        description: form.description,
+        start_date: form.startDate,
+        end_date: form.endDate,
+        registration_deadline: form.deadline,
+        team_size_min: Number(form.minTeam),
+        team_size_max: Number(form.maxTeam),
+        status: toBackendStatus(status),
+      });
+
+      setOpen(false);
+      setForm({
+        name: "",
+        description: "",
+        startDate: "",
+        endDate: "",
+        deadline: "",
+        minTeam: "2",
+        maxTeam: "4",
+      });
+      toast.success("Hackathon created");
+      await loadHackathons();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Create failed");
+    }
+  };
+
+  const handleDelete = async (hackathon: Hackathon) => {
+    try {
+      await hackathonService.remove(hackathon.id);
+      toast.success(`${hackathon.name} deleted`);
+      await loadHackathons();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Delete failed");
+    }
+  };
+
+  if (loading) {
+    return <div className="p-6 text-muted-foreground">Loading hackathons...</div>;
+  }
 
   return (
     <>
@@ -75,36 +148,62 @@ function AdminHackathons() {
               <form
                 id="create-hackathon"
                 className="grid gap-4 sm:grid-cols-2"
-                onSubmit={async (e) => {
-                  e.preventDefault();
-                  await hackathonService.create({});
-                  setOpen(false);
-                  toast.success("Hackathon created (demo)");
-                }}
+                onSubmit={handleCreate}
               >
                 <div className="space-y-2 sm:col-span-2">
                   <Label htmlFor="h-name">Hackathon name</Label>
-                  <Input id="h-name" placeholder="CodeStorm 2026" required />
+                  <Input
+                    id="h-name"
+                    value={form.name}
+                    onChange={(e) => setForm((s) => ({ ...s, name: e.target.value }))}
+                    placeholder="CodeStorm 2026"
+                    required
+                  />
                 </div>
                 <div className="space-y-2 sm:col-span-2">
                   <Label htmlFor="h-desc">Description</Label>
-                  <Textarea id="h-desc" rows={4} placeholder="What is this hackathon about?" required />
+                  <Textarea
+                    id="h-desc"
+                    rows={4}
+                    value={form.description}
+                    onChange={(e) => setForm((s) => ({ ...s, description: e.target.value }))}
+                    placeholder="What is this hackathon about?"
+                    required
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="h-start">Start date</Label>
-                  <Input id="h-start" type="date" required />
+                  <Input
+                    id="h-start"
+                    type="date"
+                    value={form.startDate}
+                    onChange={(e) => setForm((s) => ({ ...s, startDate: e.target.value }))}
+                    required
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="h-end">End date</Label>
-                  <Input id="h-end" type="date" required />
+                  <Input
+                    id="h-end"
+                    type="date"
+                    value={form.endDate}
+                    onChange={(e) => setForm((s) => ({ ...s, endDate: e.target.value }))}
+                    required
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="h-deadline">Registration deadline</Label>
-                  <Input id="h-deadline" type="date" required />
+                  <Input
+                    id="h-deadline"
+                    type="date"
+                    value={form.deadline}
+                    onChange={(e) => setForm((s) => ({ ...s, deadline: e.target.value }))}
+                    required
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Status</Label>
-                  <Select value={status} onValueChange={setStatus}>
+                  <Select value={status} onValueChange={(v) => setStatus(v as HackathonStatus)}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
                       {hackathonStatuses.map((s) => (
@@ -115,11 +214,27 @@ function AdminHackathons() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="h-min">Minimum team size</Label>
-                  <Input id="h-min" type="number" min={1} max={10} defaultValue={2} required />
+                  <Input
+                    id="h-min"
+                    type="number"
+                    min={1}
+                    max={10}
+                    value={form.minTeam}
+                    onChange={(e) => setForm((s) => ({ ...s, minTeam: e.target.value }))}
+                    required
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="h-max">Maximum team size</Label>
-                  <Input id="h-max" type="number" min={1} max={10} defaultValue={4} required />
+                  <Input
+                    id="h-max"
+                    type="number"
+                    min={1}
+                    max={10}
+                    value={form.maxTeam}
+                    onChange={(e) => setForm((s) => ({ ...s, maxTeam: e.target.value }))}
+                    required
+                  />
                 </div>
               </form>
               <DialogFooter>
@@ -167,7 +282,7 @@ function AdminHackathons() {
                         size="icon"
                         variant="ghost"
                         aria-label="Edit"
-                        onClick={() => toast.info(`Edit ${h.name} (demo)`)}
+                        onClick={() => toast.info(`Edit ${h.name} coming soon`)}
                       >
                         <Pencil className="h-4 w-4" />
                       </Button>
@@ -176,7 +291,7 @@ function AdminHackathons() {
                         variant="ghost"
                         aria-label="Delete"
                         className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-                        onClick={() => toast.error(`${h.name} deleted (demo)`)}
+                        onClick={() => handleDelete(h)}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>

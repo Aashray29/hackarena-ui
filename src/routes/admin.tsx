@@ -10,7 +10,8 @@ import {
   Settings,
 } from "lucide-react";
 import { DashboardLayout, type NavItem } from "@/components/layout/DashboardLayout";
-import { currentAdmin } from "@/data/mockUsers";
+import { authService } from "@/services/authService";
+import { requireAuth } from "@/lib/authGuard";
 
 const items: NavItem[] = [
   { label: "Dashboard", to: "/admin", icon: LayoutDashboard, exact: true },
@@ -24,16 +25,19 @@ const items: NavItem[] = [
 ];
 
 export const Route = createFileRoute("/admin")({
+  beforeLoad: () => requireAuth("admin"),
   component: AdminLayout,
 });
 
 function AdminLayout() {
+  const user = authService.getUser();
+
   return (
     <DashboardLayout
       items={items}
       roleLabel="Admin"
-      userName={currentAdmin.name}
-      userMeta={currentAdmin.college}
+      userName={user?.name || "Admin"}
+      userMeta={user?.college || user?.email || ""}
     >
       <Outlet />
     </DashboardLayout>

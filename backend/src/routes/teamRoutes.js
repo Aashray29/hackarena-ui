@@ -4,43 +4,74 @@ const {
     createTeam,
     joinTeam,
     getTeamById,
-    leaveTeam,getTeamMembers
+    leaveTeam,
+    getTeamMembers,
+    getAllTeams,
+    getMyTeam,
+    deleteTeam,
+    inviteMember
 } = require("../controllers/teamController");
 
 const {
-    authenticate
+    authenticate,
+    authorize
 } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
+router.get(
+    "/my",
+    authenticate,
+    getMyTeam
+);
 
-// POST /api/teams
+router.get(
+    "/",
+    authenticate,
+    getAllTeams
+);
+
 router.post(
     "/",
     authenticate,
     createTeam
 );
-// POST /api/teams/:id/join
+
 router.post(
     "/:id/join",
     authenticate,
     joinTeam
 );
+
+router.post(
+    "/:id/invite",
+    authenticate,
+    inviteMember
+);
+
 router.get(
     "/:id/members",
     authenticate,
     getTeamMembers
 );
-// GET TEAM BY ID
+
 router.get(
     "/:id",
     authenticate,
     getTeamById
 );
-// LEAVE TEAM
+
 router.delete(
     "/:id/leave",
     authenticate,
     leaveTeam
 );
+
+router.delete(
+    "/:id",
+    authenticate,
+    authorize("admin"),
+    deleteTeam
+);
+
 module.exports = router;

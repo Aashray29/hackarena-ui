@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   Search,
@@ -15,7 +16,8 @@ import {
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { HackathonCard } from "@/components/HackathonCard";
 import { Button } from "@/components/ui/button";
-import { mockHackathons } from "@/data/mockHackathons";
+import { hackathonService } from "@/services/hackathonService";
+import type { Hackathon } from "@/types";
 import heroImage from "@/assets/hero-hackarena.jpg";
 
 export const Route = createFileRoute("/")({
@@ -71,7 +73,11 @@ const steps = [
 ];
 
 function Landing() {
-  const featured = mockHackathons.slice(0, 3);
+  const [featured, setFeatured] = useState<Hackathon[]>([]);
+
+  useEffect(() => {
+    hackathonService.list().then((data) => setFeatured(data.slice(0, 3))).catch(console.error);
+  }, []);
 
   return (
     <PublicLayout>

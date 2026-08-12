@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Search, Eye } from "lucide-react";
 import { toast } from "sonner";
@@ -8,13 +8,6 @@ import { Avatar } from "@/components/Avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Table,
   TableBody,
   TableCell,
@@ -22,36 +15,55 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { mockUsers } from "@/data/mockUsers";
-import { mockTeams } from "@/data/mockTeams";
+import { authService } from "@/services/authService";
+
+interface ParticipantRow {
+  user_id: number;
+  name: string;
+  email: string;
+  college: string | null;
+  registered_hackathons: number;
+  team_name: string | null;
+}
 
 export const Route = createFileRoute("/admin/participants")({
-  head: () => ({
-    meta: [
-      { title: "Participants — HackArena Admin" },
-      { name: "description", content: "Search and manage every registered participant." },
-      { property: "og:title", content: "Participants — HackArena Admin" },
-      { property: "og:description", content: "Participant directory and registrations." },
-    ],
-  }),
   component: AdminParticipants,
 });
 
 function AdminParticipants() {
+  const [participants, setParticipants] = useState<ParticipantRow[]>([]);
+  const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
-  const [status, setStatus] = useState("all");
+
+  useEffect(() => {
+    const loadParticipants = async () => {
+      try {
+        const data = await authService.getParticipants();
+        setParticipants(data);
+      } catch (error) {
+        console.error("Failed to load participants:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadParticipants();
+  }, []);
 
   const rows = useMemo(
     () =>
-      mockUsers.filter(
+      participants.filter(
         (u) =>
-          (status === "all" || u.status === status) &&
-          (u.name.toLowerCase().includes(query.toLowerCase()) ||
-            u.email.toLowerCase().includes(query.toLowerCase()) ||
-            u.college.toLowerCase().includes(query.toLowerCase())),
+          u.name.toLowerCase().includes(query.toLowerCase()) ||
+          u.email.toLowerCase().includes(query.toLowerCase()) ||
+          (u.college ?? "").toLowerCase().includes(query.toLowerCase()),
       ),
-    [query, status],
+    [participants, query],
   );
+
+  if (loading) {
+    return <div className="p-6 text-muted-foreground">Loading participants...</div>;
+  }
 
   return (
     <>
@@ -67,14 +79,6 @@ function AdminParticipants() {
             className="pl-9"
           />
         </div>
-        <Select value={status} onValueChange={setStatus}>
-          <SelectTrigger className="md:w-48"><SelectValue placeholder="Status" /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All statuses</SelectItem>
-            <SelectItem value="Active">Active</SelectItem>
-            <SelectItem value="Inactive">Inactive</SelectItem>
-          </SelectContent>
-        </Select>
       </div>
 
       <div className="surface-card overflow-hidden rounded-2xl">
@@ -93,7 +97,7 @@ function AdminParticipants() {
             </TableHeader>
             <TableBody>
               {rows.map((u) => (
-                <TableRow key={u.id}>
+                <TableRow key={u.user_id}>
                   <TableCell>
                     <div className="flex min-w-0 items-center gap-3">
                       <Avatar name={u.name} size="sm" />
@@ -101,19 +105,19 @@ function AdminParticipants() {
                     </div>
                   </TableCell>
                   <TableCell className="text-muted-foreground">{u.email}</TableCell>
-                  <TableCell className="text-muted-foreground">{u.college}</TableCell>
+                  <TableCell className="text-muted-foreground">{u.college ?? "—"}</TableCell>
                   <TableCell className="text-muted-foreground">
-                    {u.registeredHackathons.length}
+                    {u.registered_hackathons}
                   </TableCell>
                   <TableCell className="text-muted-foreground">
-                    {mockTeams.find((t) => t.id === u.teamId)?.name ?? "—"}
+                    {u.team_name ?? "—"}
                   </TableCell>
-                  <TableCell><StatusBadge status={u.status} /></TableCell>
+                  <TableCell><StatusBadge status="Active" /></TableCell>
                   <TableCell className="text-right">
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() => toast.info(`Viewing ${u.name} (demo)`)}
+                      onClick={() => toast.info(`Viewing ${u.name}`)}
                     >
                       <Eye className="mr-1.5 h-4 w-4" /> View
                     </Button>

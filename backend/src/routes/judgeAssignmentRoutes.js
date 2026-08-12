@@ -1,7 +1,9 @@
 const express = require("express");
 
 const {
-    assignJudge
+    assignJudge,
+    getMyAssignments,
+    getAllJudges
 } = require("../controllers/judgeAssignmentController");
 
 const {
@@ -11,14 +13,25 @@ const {
 
 const router = express.Router();
 
+router.get(
+    "/my",
+    authenticate,
+    authorize("judge"),
+    getMyAssignments
+);
 
-// ADMIN - ASSIGN JUDGE
+router.get(
+    "/judges",
+    authenticate,
+    authorize("admin"),
+    getAllJudges
+);
+
 router.post(
     "/",
     authenticate,
     authorize("admin"),
     assignJudge
 );
-
 
 module.exports = router;

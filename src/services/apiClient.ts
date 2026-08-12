@@ -1,4 +1,5 @@
-const API_BASE_URL = "http://localhost:5000/api";
+const API_BASE_URL =
+  import.meta.env["VITE_API_BASE_URL"] || "http://localhost:5000/api";
 
 interface RequestOptions extends RequestInit {
   auth?: boolean;
@@ -15,7 +16,7 @@ async function request<T>(
       ? localStorage.getItem("token")
       : null;
 
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+  const requestInit: RequestInit = {
     ...fetchOptions,
     headers: {
       "Content-Type": "application/json",
@@ -26,15 +27,26 @@ async function request<T>(
         : {}),
       ...headers,
     },
-  });
+  };
+
+  if (fetchOptions.body !== undefined) {
+    requestInit.body = fetchOptions.body;
+  }
+
+  const response = await fetch(
+    `${API_BASE_URL}${endpoint}`,
+    requestInit,
+  );
 
   const data = await response.json().catch(() => ({}));
 
   if (!response.ok || data.success === false) {
-    throw new Error(data.message || `Request failed: ${response.status}`);
+    throw new Error(
+      data.message || `Request failed: ${response.status}`,
+    );
   }
 
-  return data;
+  return data as T;
 }
 
 export const apiClient = {
@@ -45,20 +57,38 @@ export const apiClient = {
     });
   },
 
-  post<T>(endpoint: string, body?: unknown, auth = true) {
-    return request<T>(endpoint, {
+  post<T>(
+    endpoint: string,
+    body?: unknown,
+    auth = true,
+  ) {
+    const options: RequestOptions = {
       method: "POST",
       auth,
-      body: body === undefined ? undefined : JSON.stringify(body),
-    });
+    };
+
+    if (body !== undefined) {
+      options.body = JSON.stringify(body);
+    }
+
+    return request<T>(endpoint, options);
   },
 
-  put<T>(endpoint: string, body?: unknown, auth = true) {
-    return request<T>(endpoint, {
+  put<T>(
+    endpoint: string,
+    body?: unknown,
+    auth = true,
+  ) {
+    const options: RequestOptions = {
       method: "PUT",
       auth,
-      body: body === undefined ? undefined : JSON.stringify(body),
-    });
+    };
+
+    if (body !== undefined) {
+      options.body = JSON.stringify(body);
+    }
+
+    return request<T>(endpoint, options);
   },
 
   delete<T>(endpoint: string, auth = true) {

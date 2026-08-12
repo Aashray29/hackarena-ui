@@ -4,6 +4,7 @@ import { Menu, X, LogOut, type LucideIcon } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { Avatar } from "@/components/Avatar";
 import { cn } from "@/lib/utils";
+import { authService } from "@/services/authService";
 
 export interface NavItem {
   label: string;
@@ -30,8 +31,8 @@ function SidebarNav({ items, onNavigate }: { items: NavItem[]; onNavigate?: (() 
         return (
           <Link
             key={item.to}
-            to={item.to as LinkProps["to"]}
-            onClick={onNavigate}
+            to={item.to as NonNullable<LinkProps["to"]>}
+            {...(onNavigate ? { onClick: onNavigate } : {})}
             className={cn(
               "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors",
               active
@@ -45,8 +46,11 @@ function SidebarNav({ items, onNavigate }: { items: NavItem[]; onNavigate?: (() 
         );
       })}
       <Link
-        to="/"
-        onClick={onNavigate}
+        to="/login"
+        onClick={() => {
+          authService.logout();
+          onNavigate?.();
+        }}
         className="mt-2 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
       >
         <LogOut className="h-4 w-4 shrink-0" />
@@ -114,10 +118,11 @@ export function DashboardLayout({ items, roleLabel, userName, userMeta, children
             <p className="truncate text-xs text-muted-foreground">HackArena Platform</p>
           </div>
           <Link
-            to="/"
+            to="/login"
+            onClick={() => authService.logout()}
             className="shrink-0 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-colors hover:border-primary/50 hover:text-primary"
           >
-            Exit demo
+            Logout
           </Link>
         </header>
 

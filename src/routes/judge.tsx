@@ -1,7 +1,8 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { LayoutDashboard, FolderKanban, Hourglass, CheckCheck, User } from "lucide-react";
 import { DashboardLayout, type NavItem } from "@/components/layout/DashboardLayout";
-import { currentJudge } from "@/data/mockUsers";
+import { authService } from "@/services/authService";
+import { requireAuth } from "@/lib/authGuard";
 
 const items: NavItem[] = [
   { label: "Dashboard", to: "/judge", icon: LayoutDashboard, exact: true },
@@ -12,16 +13,19 @@ const items: NavItem[] = [
 ];
 
 export const Route = createFileRoute("/judge")({
+  beforeLoad: () => requireAuth("judge"),
   component: JudgeLayout,
 });
 
 function JudgeLayout() {
+  const user = authService.getUser();
+
   return (
     <DashboardLayout
       items={items}
       roleLabel="Judge"
-      userName={currentJudge.name}
-      userMeta={currentJudge.organization}
+      userName={user?.name || "Judge"}
+      userMeta={user?.college || user?.email || ""}
     >
       <Outlet />
     </DashboardLayout>

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Search, Crown, Medal, Award } from "lucide-react";
 import { PublicLayout } from "@/components/layout/PublicLayout";
@@ -22,46 +22,80 @@ import {
 import { evaluationService } from "@/services/evaluationService";
 import { hackathonService } from "@/services/hackathonService";
 import { cn } from "@/lib/utils";
+import type { Hackathon, LeaderboardEntry } from "@/types";
 
 export const Route = createFileRoute("/leaderboard")({
-  head: () => ({
-    meta: [
-      { title: "Leaderboard — HackArena" },
-      {
-        name: "description",
-        content: "See the top-scoring hackathon teams and projects ranked by judge evaluations.",
-      },
-      { property: "og:title", content: "Leaderboard — HackArena" },
-      { property: "og:description", content: "Top teams, projects and scores across HackArena events." },
-    ],
-  }),
   component: LeaderboardPage,
 });
 
 const podiumStyles = [
-  { icon: Crown, ring: "ring-gold/50", text: "text-gold", label: "1st Place", medal: "🥇", order: "sm:order-2 sm:scale-105" },
-  { icon: Medal, ring: "ring-silver/50", text: "text-silver", label: "2nd Place", medal: "🥈", order: "sm:order-1" },
-  { icon: Award, ring: "ring-bronze/50", text: "text-bronze", label: "3rd Place", medal: "🥉", order: "sm:order-3" },
+  { ring: "ring-gold/50", text: "text-gold", label: "1st Place", medal: "🥇", order: "sm:order-2 sm:scale-105" },
+  { ring: "ring-silver/50", text: "text-silver", label: "2nd Place", medal: "🥈", order: "sm:order-1" },
+  { ring: "ring-bronze/50", text: "text-bronze", label: "3rd Place", medal: "🥉", order: "sm:order-3" },
 ];
 
 function LeaderboardPage() {
-  const entries = evaluationService.leaderboard();
-  const hackathons = hackathonService.list();
+  const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
+  const [hackathons, setHackathons] = useState<Hackathon[]>([]);
+  const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [hackathon, setHackathon] = useState("all");
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [leaderboard, hackathonList] = await Promise.all([
+          evaluationService.leaderboard(),
+          hackathonService.list(),
+        ]);
+        setEntries(leaderboard);
+        setHackathons(hackathonList);
+      } catch (error) {
+        console.error("Failed to load leaderboard:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  useEffect(() => {
+    const loadFiltered = async () => {
+      try {
+        const data = await evaluationService.leaderboard(
+          hackathon === "all" ? undefined : hackathon,
+        );
+        setEntries(data);
+      } catch (error) {
+        console.error("Failed to filter leaderboard:", error);
+      }
+    };
+
+    if (!loading) {
+      loadFiltered();
+    }
+  }, [hackathon, loading]);
 
   const filtered = useMemo(
     () =>
       entries.filter(
         (e) =>
-          (hackathon === "all" || e.hackathonId === hackathon) &&
-          (e.teamName.toLowerCase().includes(query.toLowerCase()) ||
-            e.projectName.toLowerCase().includes(query.toLowerCase())),
+          e.teamName.toLowerCase().includes(query.toLowerCase()) ||
+          e.projectName.toLowerCase().includes(query.toLowerCase()),
       ),
-    [entries, query, hackathon],
+    [entries, query],
   );
 
   const top3 = entries.slice(0, 3);
+
+  if (loading) {
+    return (
+      <PublicLayout>
+        <div className="mx-auto max-w-7xl px-4 py-12 text-muted-foreground">Loading leaderboard...</div>
+      </PublicLayout>
+    );
+  }
 
   return (
     <PublicLayout>

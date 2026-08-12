@@ -187,9 +187,104 @@ const getCurrentUser = async (req, res) => {
     }
 };
 
+// ============================================
+// UPDATE PROFILE
+// ============================================
+
+const updateProfile = async (req, res) => {
+    try {
+        const { name, college, phone } = req.body;
+        const userId = req.user.userId;
+
+        if (!name) {
+            return res.status(400).json({
+                success: false,
+                message: "Name is required"
+            });
+        }
+
+        await pool.query(
+            `UPDATE users
+             SET name = ?, college = ?, phone = ?
+             WHERE user_id = ?`,
+            [name, college || null, phone || null, userId]
+        );
+
+        const [users] = await pool.query(
+            `SELECT user_id, name, email, college, phone, role
+             FROM users WHERE user_id = ?`,
+            [userId]
+        );
+
+        res.status(200).json({
+            success: true,
+            message: "Profile updated successfully",
+            user: users[0]
+        });
+
+    } catch (error) {
+        console.error("Update profile error:", error.message);
+
+        res.status(500).json({
+            success: false,
+            message: "Failed to update profile"
+        });
+    }
+};
+
+// ============================================
+// GET ALL PARTICIPANTS (ADMIN)
+// ============================================
+
+const getAllParticipants = async (req, res) => {
+    try {
+        const [participants] = await pool.query(
+            `SELECT
+                u.user_id,
+                u.name,
+                u.email,
+                u.college,
+                u.phone,
+                u.role,
+                u.created_at,
+                (
+                    SELECT COUNT(*)
+                    FROM registrations r
+                    WHERE r.user_id = u.user_id
+                ) AS registered_hackathons,
+                (
+                    SELECT t.team_name
+                    FROM team_members tm
+                    JOIN teams t ON tm.team_id = t.team_id
+                    WHERE tm.user_id = u.user_id
+                    ORDER BY tm.joined_at DESC
+                    LIMIT 1
+                ) AS team_name
+             FROM users u
+             WHERE u.role = 'participant'
+             ORDER BY u.name ASC`
+        );
+
+        res.status(200).json({
+            success: true,
+            count: participants.length,
+            data: participants
+        });
+
+    } catch (error) {
+        console.error("Get participants error:", error.message);
+
+        res.status(500).json({
+            success: false,
+            message: "Failed to fetch participants"
+        });
+    }
+};
 
 module.exports = {
     registerUser,
     loginUser,
-    getCurrentUser
+    getCurrentUser,
+    updateProfile,
+    getAllParticipants
 };

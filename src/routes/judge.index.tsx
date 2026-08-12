@@ -1,3 +1,4 @@
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ClipboardList, CheckCircle2, Hourglass, Star } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
@@ -5,24 +6,46 @@ import { StatCard } from "@/components/StatCard";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { evaluationService } from "@/services/evaluationService";
-import { submissionService } from "@/services/submissionService";
+import type { Submission } from "@/types";
+
+type AssignedSubmission = Submission & { assignmentId: string };
 
 export const Route = createFileRoute("/judge/")({
-  head: () => ({
-    meta: [
-      { title: "Judge Dashboard — HackArena" },
-      { name: "description", content: "Your evaluation workload, pending reviews and scoring history." },
-      { property: "og:title", content: "Judge Dashboard — HackArena" },
-      { property: "og:description", content: "Evaluate hackathon projects on HackArena." },
-    ],
-  }),
   component: JudgeDashboard,
 });
 
 function JudgeDashboard() {
-  const submissions = submissionService.list();
-  const evaluations = evaluationService.list();
-  const pending = submissions.filter((s) => s.evaluationStatus !== "Evaluated");
+  const [submissions, setSubmissions] = useState<AssignedSubmission[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const data = await evaluationService.getMyAssignments();
+        setSubmissions(data);
+      } catch (error) {
+        console.error("Failed to load assignments:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  const pending = useMemo(
+    () => submissions.filter((s) => s.evaluationStatus !== "Evaluated"),
+    [submissions],
+  );
+
+  const evaluated = submissions.length - pending.length;
+  const averageScore =
+    submissions.reduce((sum, s) => sum + (s.score ?? 0), 0) /
+    (submissions.filter((s) => s.score).length || 1);
+
+  if (loading) {
+    return <div className="p-6 text-muted-foreground">Loading dashboard...</div>;
+  }
 
   return (
     <>
@@ -38,9 +61,14 @@ function JudgeDashboard() {
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard label="Assigned Projects" value={submissions.length} icon={ClipboardList} />
-        <StatCard label="Evaluated" value={evaluations.length} icon={CheckCircle2} />
+        <StatCard label="Evaluated" value={evaluated} icon={CheckCircle2} />
         <StatCard label="Pending" value={pending.length} icon={Hourglass} />
-        <StatCard label="Average Score Given" value={86} icon={Star} hint="out of 100" />
+        <StatCard
+          label="Average Score Given"
+          value={Math.round(averageScore) || 0}
+          icon={Star}
+          hint="out of 100"
+        />
       </div>
 
       <section className="surface-card rounded-2xl p-6">
@@ -67,6 +95,9 @@ function JudgeDashboard() {
               </div>
             </li>
           ))}
+          {pending.length === 0 && (
+            <li className="text-sm text-muted-foreground">No pending evaluations.</li>
+          )}
         </ul>
       </section>
     </>

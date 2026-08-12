@@ -2,28 +2,41 @@ const express = require("express");
 
 const {
     createSubmission,
-    getSubmissionById
+    getSubmissionById,
+    getMySubmission,
+    getAllSubmissions
 } = require("../controllers/submissionController");
 
 const {
-    authenticate
+    authenticate,
+    authorize
 } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
+router.get(
+    "/my",
+    authenticate,
+    getMySubmission
+);
 
-// CREATE SUBMISSION
+router.get(
+    "/",
+    authenticate,
+    authorize("admin", "judge"),
+    getAllSubmissions
+);
+
 router.post(
     "/",
     authenticate,
     createSubmission
 );
-// GET SUBMISSION
+
 router.get(
     "/:id",
     authenticate,
     getSubmissionById
 );
-
 
 module.exports = router;

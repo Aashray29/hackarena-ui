@@ -26,8 +26,7 @@ router.post(
 router.get(
     "/my",
     authenticate,
-    getMyRegistrations,
-    updateSubmission
+    getMyRegistrations
 );
 // ADMIN - GET HACKATHON REGISTRATIONS
 router.get(

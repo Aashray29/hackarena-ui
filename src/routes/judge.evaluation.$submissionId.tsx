@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute, useNavigate, Link, notFound } from "@tanstack/react-router";
 import { Github, ExternalLink, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
@@ -8,18 +8,10 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
-import { submissionService } from "@/services/submissionService";
 import { evaluationService } from "@/services/evaluationService";
+import type { Submission } from "@/types";
 
 export const Route = createFileRoute("/judge/evaluation/$submissionId")({
-  head: () => ({
-    meta: [
-      { title: "Evaluate Project — HackArena Judge" },
-      { name: "description", content: "Score a hackathon project on innovation, technical depth, impact and presentation." },
-      { property: "og:title", content: "Evaluate Project — HackArena Judge" },
-      { property: "og:description", content: "Judge scoring form." },
-    ],
-  }),
   component: JudgeEvaluation,
 });
 
@@ -30,10 +22,13 @@ const criteria = [
   { key: "presentation", label: "Presentation & Demo", max: 25 },
 ] as const;
 
+type AssignedSubmission = Submission & { assignmentId: string };
+
 function JudgeEvaluation() {
   const { submissionId } = Route.useParams();
   const navigate = useNavigate();
-  const submission = submissionService.list().find((s) => s.id === submissionId);
+  const [submission, setSubmission] = useState<AssignedSubmission | null>(null);
+  const [loading, setLoading] = useState(true);
   const [scores, setScores] = useState<Record<string, number>>({
     innovation: 20,
     technical: 20,
@@ -41,6 +36,26 @@ function JudgeEvaluation() {
     presentation: 20,
   });
   const [feedback, setFeedback] = useState("");
+
+  useEffect(() => {
+    const loadSubmission = async () => {
+      try {
+        const assignments = await evaluationService.getMyAssignments();
+        const match = assignments.find((s) => s.id === submissionId) ?? null;
+        setSubmission(match);
+      } catch (error) {
+        console.error("Failed to load submission:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadSubmission();
+  }, [submissionId]);
+
+  if (loading) {
+    return <div className="p-6 text-muted-foreground">Loading project...</div>;
+  }
 
   if (!submission) throw notFound();
 
@@ -65,16 +80,26 @@ function JudgeEvaluation() {
           className="surface-card space-y-7 rounded-2xl p-6"
           onSubmit={async (e) => {
             e.preventDefault();
-            await evaluationService.submit({
-              submissionId,
-              innovation: scores['innovation'] ?? 0,
-              technical: scores['technical'] ?? 0,
-              impact: scores['impact'] ?? 0,
-              presentation: scores['presentation'] ?? 0,
-              feedback,
-            });
-            toast.success("Evaluation submitted");
-            navigate({ to: "/judge/assigned" });
+
+            if (!submission.assignmentId) {
+              toast.error("Assignment not found for this submission");
+              return;
+            }
+
+            try {
+              await evaluationService.submit({
+                assignmentId: submission.assignmentId,
+                innovation: scores["innovation"] ?? 0,
+                technical: scores["technical"] ?? 0,
+                impact: scores["impact"] ?? 0,
+                presentation: scores["presentation"] ?? 0,
+                feedback,
+              });
+              toast.success("Evaluation submitted");
+              navigate({ to: "/judge/assigned" });
+            } catch (error) {
+              toast.error(error instanceof Error ? error.message : "Submit failed");
+            }
           }}
         >
           <h2 className="font-display text-lg font-semibold">Scoring</h2>
@@ -124,7 +149,7 @@ function JudgeEvaluation() {
             <h2 className="font-display text-lg font-semibold">Project details</h2>
             <p className="mt-3 text-sm text-muted-foreground">{submission.description}</p>
             <div className="mt-4 flex flex-wrap gap-2">
-              {submission.technologies.map((t: string) => (
+              {submission.technologies.map((t) => (
                 <span
                   key={t}
                   className="rounded-full border border-border bg-muted px-2.5 py-1 text-xs text-muted-foreground"
@@ -134,27 +159,21 @@ function JudgeEvaluation() {
               ))}
             </div>
             <div className="mt-5 flex flex-wrap gap-2">
-              <Button asChild size="sm" variant="secondary">
-                <a href={submission.githubUrl} target="_blank" rel="noreferrer">
-                  <Github className="mr-1.5 h-4 w-4" /> Repository
-                </a>
-              </Button>
-              <Button asChild size="sm" variant="secondary">
-                <a href={submission.demoUrl} target="_blank" rel="noreferrer">
-                  <ExternalLink className="mr-1.5 h-4 w-4" /> Live demo
-                </a>
-              </Button>
+              {submission.githubUrl && (
+                <Button asChild size="sm" variant="secondary">
+                  <a href={submission.githubUrl} target="_blank" rel="noreferrer">
+                    <Github className="mr-1.5 h-4 w-4" /> Repository
+                  </a>
+                </Button>
+              )}
+              {submission.demoUrl && (
+                <Button asChild size="sm" variant="secondary">
+                  <a href={submission.demoUrl} target="_blank" rel="noreferrer">
+                    <ExternalLink className="mr-1.5 h-4 w-4" /> Live demo
+                  </a>
+                </Button>
+              )}
             </div>
-          </section>
-
-          <section className="surface-card rounded-2xl p-6">
-            <h2 className="font-display text-lg font-semibold">Scoring guide</h2>
-            <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-              <li>21–25 — Outstanding, best in class</li>
-              <li>16–20 — Strong, above expectations</li>
-              <li>11–15 — Solid, meets expectations</li>
-              <li>0–10 — Needs significant work</li>
-            </ul>
           </section>
         </aside>
       </div>

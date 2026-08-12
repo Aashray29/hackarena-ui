@@ -2,6 +2,7 @@ import type {
   Hackathon,
   HackathonStatus,
 } from "@/types";
+
 import { apiClient } from "./apiClient";
 
 interface BackendHackathon {
@@ -17,7 +18,20 @@ interface BackendHackathon {
   created_at: string;
 }
 
-const mapStatus = (status: string): HackathonStatus => {
+interface HackathonListResponse {
+  success: boolean;
+  count: number;
+  data: BackendHackathon[];
+}
+
+interface HackathonResponse {
+  success: boolean;
+  data: BackendHackathon;
+}
+
+const mapStatus = (
+  status: string,
+): HackathonStatus => {
   switch (status) {
     case "registration_open":
       return "Registration Open";
@@ -36,54 +50,74 @@ const mapStatus = (status: string): HackathonStatus => {
   }
 };
 
-const mapHackathon = (h: BackendHackathon): Hackathon => ({
-  id: String(h.hackathon_id),
-  name: h.name,
-  tagline: "",
-  description: h.description || "",
+const mapHackathon = (
+  hackathon: BackendHackathon,
+): Hackathon => {
+  return {
+    id: String(hackathon.hackathon_id),
 
-  startDate: h.start_date,
-  endDate: h.end_date,
-  registrationDeadline: h.registration_deadline,
+    name: hackathon.name,
 
-  minTeamSize: h.team_size_min,
-  maxTeamSize: h.team_size_max,
+    tagline: hackathon.description,
 
-  status: mapStatus(h.status),
+    description: hackathon.description || "",
 
-  participants: 0,
-  teams: 0,
+    startDate: hackathon.start_date,
 
-  prizePool: "",
-  prizes: [],
+    endDate: hackathon.end_date,
 
-  rules: [],
-  themes: [],
-  technologies: [],
-  timeline: [],
+    registrationDeadline:
+      hackathon.registration_deadline,
 
-  location: "",
-  mode: "Online",
-});
+    minTeamSize: hackathon.team_size_min,
+
+    maxTeamSize: hackathon.team_size_max,
+
+    status: mapStatus(hackathon.status),
+
+    // Your current backend response doesn't provide these.
+    participants: 0,
+    teams: 0,
+
+    prizePool: "",
+
+    prizes: [],
+
+    rules: [],
+
+    themes: [],
+
+    technologies: [],
+
+    timeline: [],
+
+    location: "Online",
+
+    mode: "Online",
+  };
+};
 
 export const hackathonService = {
   async list(): Promise<Hackathon[]> {
-    const data = await apiClient.get<{
-      success: boolean;
-      count: number;
-      data: BackendHackathon[];
-    }>("/hackathons", false);
+    const response =
+      await apiClient.get<HackathonListResponse>(
+        "/hackathons",
+        false,
+      );
 
-    return data.data.map(mapHackathon);
+    return response.data.map(mapHackathon);
   },
 
-  async getById(id: string): Promise<Hackathon> {
-    const data = await apiClient.get<{
-      success: boolean;
-      data: BackendHackathon;
-    }>(`/hackathons/${id}`, false);
+  async getById(
+    id: string,
+  ): Promise<Hackathon> {
+    const response =
+      await apiClient.get<HackathonResponse>(
+        `/hackathons/${id}`,
+        false,
+      );
 
-    return mapHackathon(data.data);
+    return mapHackathon(response.data);
   },
 
   async create(payload: {
@@ -96,7 +130,10 @@ export const hackathonService = {
     team_size_max: number;
     status: string;
   }) {
-    return apiClient.post("/hackathons", payload);
+    return apiClient.post(
+      "/hackathons",
+      payload,
+    );
   },
 
   async update(
@@ -112,10 +149,15 @@ export const hackathonService = {
       status: string;
     }>,
   ) {
-    return apiClient.put(`/hackathons/${id}`, payload);
+    return apiClient.put(
+      `/hackathons/${id}`,
+      payload,
+    );
   },
 
   async remove(id: string) {
-    return apiClient.delete(`/hackathons/${id}`);
+    return apiClient.delete(
+      `/hackathons/${id}`,
+    );
   },
 };

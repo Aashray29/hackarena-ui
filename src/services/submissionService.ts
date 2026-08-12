@@ -1,4 +1,8 @@
 import type { Submission } from "@/types";
+import {
+  mapSubmission,
+  type BackendSubmission,
+} from "@/lib/mappers";
 import { apiClient } from "./apiClient";
 
 export interface SubmissionPayload {
@@ -10,30 +14,67 @@ export interface SubmissionPayload {
   technologies: string;
 }
 
+export interface SubmissionDraft {
+  projectName: string;
+  description: string;
+  technologies: string;
+  githubUrl: string;
+  demoUrl: string;
+  teamName: string;
+}
+
 export const submissionService = {
-  async getMySubmission(): Promise<Submission | null> {
+  async getMySubmission(hackathonId?: string): Promise<Submission | null> {
+    try {
+      const endpoint = hackathonId
+        ? `/submissions/my?hackathon_id=${hackathonId}`
+        : "/submissions/my";
+
+      const data = await apiClient.get<{
+        success: boolean;
+        data: BackendSubmission;
+      }>(endpoint);
+
+      return mapSubmission(data.data);
+    } catch {
+      return null;
+    }
+  },
+
+  async list(): Promise<Submission[]> {
     const data = await apiClient.get<{
       success: boolean;
-      data: Submission | null;
-    }>("/submissions/my");
+      data: BackendSubmission[];
+    }>("/submissions");
 
-    return data.data;
+    return data.data.map(mapSubmission);
   },
 
   async getById(id: string) {
-    const data = await apiClient.get(`/submissions/${id}`);
+    const data = await apiClient.get<{
+      success: boolean;
+      data: BackendSubmission;
+    }>(`/submissions/${id}`);
 
-    return data.data;
+    return mapSubmission(data.data);
   },
 
   async create(payload: SubmissionPayload) {
     return apiClient.post("/submissions", payload);
   },
 
-  async update(
-    id: string,
-    payload: Partial<SubmissionPayload>,
-  ) {
+  async submit(form: SubmissionDraft, teamId: number) {
+    return this.create({
+      team_id: teamId,
+      project_name: form.projectName,
+      description: form.description,
+      github_url: form.githubUrl,
+      demo_url: form.demoUrl,
+      technologies: form.technologies,
+    });
+  },
+
+  async update(id: string, payload: Partial<SubmissionPayload>) {
     return apiClient.put(`/submissions/${id}`, payload);
   },
 };

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Plus, Mail } from "lucide-react";
 import { toast } from "sonner";
@@ -24,30 +24,61 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { mockJudges } from "@/data/mockUsers";
 import { hackathonService } from "@/services/hackathonService";
 import { submissionService } from "@/services/submissionService";
 import { evaluationService } from "@/services/evaluationService";
+import type { Hackathon, Submission } from "@/types";
+
+interface JudgeRow {
+  user_id: number;
+  name: string;
+  email: string;
+  college: string | null;
+  assigned: number;
+  evaluated: number;
+}
 
 export const Route = createFileRoute("/admin/judges")({
-  head: () => ({
-    meta: [
-      { title: "Judges — HackArena Admin" },
-      { name: "description", content: "Manage judges and assign submissions for evaluation." },
-      { property: "og:title", content: "Judges — HackArena Admin" },
-      { property: "og:description", content: "Judge roster and assignment console." },
-    ],
-  }),
   component: AdminJudges,
 });
 
 function AdminJudges() {
-  const hackathons = hackathonService.list();
-  const submissions = submissionService.list();
+  const [judges, setJudges] = useState<JudgeRow[]>([]);
+  const [hackathons, setHackathons] = useState<Hackathon[]>([]);
+  const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [loading, setLoading] = useState(true);
   const [addOpen, setAddOpen] = useState(false);
-  const [judgeId, setJudgeId] = useState(mockJudges[0]?.id ?? "");
-  const [hackathonId, setHackathonId] = useState(hackathons[0]?.id ?? "");
-  const [submissionId, setSubmissionId] = useState(submissions[0]?.id ?? "");
+  const [judgeId, setJudgeId] = useState("");
+  const [submissionId, setSubmissionId] = useState("");
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [judgeList, hackathonList, submissionList] = await Promise.all([
+          evaluationService.getJudges(),
+          hackathonService.list(),
+          submissionService.list(),
+        ]);
+
+        setJudges(judgeList);
+        setHackathons(hackathonList);
+        setSubmissions(submissionList);
+
+        if (judgeList[0]) setJudgeId(String(judgeList[0].user_id));
+        if (submissionList[0]) setSubmissionId(submissionList[0].id);
+      } catch (error) {
+        console.error("Failed to load judges:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  if (loading) {
+    return <div className="p-6 text-muted-foreground">Loading judges...</div>;
+  }
 
   return (
     <>
@@ -64,31 +95,22 @@ function AdminJudges() {
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Add a judge</DialogTitle>
-                <DialogDescription>They'll receive an invitation email.</DialogDescription>
+                <DialogDescription>
+                  Register judges through the admin account or database seed.
+                </DialogDescription>
               </DialogHeader>
               <div className="grid gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="j-name">Full name</Label>
-                  <Input id="j-name" placeholder="Dr. Vikram Suresh" />
+                  <Input id="j-name" placeholder="Dr. Vikram Suresh" disabled />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="j-email">Email</Label>
-                  <Input id="j-email" type="email" placeholder="judge@company.com" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="j-org">Organisation</Label>
-                  <Input id="j-org" placeholder="Zoho Corporation" />
+                  <Input id="j-email" type="email" placeholder="judge@company.com" disabled />
                 </div>
               </div>
               <DialogFooter>
-                <Button
-                  onClick={() => {
-                    setAddOpen(false);
-                    toast.success("Judge invited (demo)");
-                  }}
-                >
-                  Add Judge
-                </Button>
+                <Button onClick={() => setAddOpen(false)}>Close</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -96,13 +118,13 @@ function AdminJudges() {
       />
 
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-        {mockJudges.map((j) => (
-          <article key={j.id} className="surface-card hover-lift rounded-2xl p-5">
+        {judges.map((j) => (
+          <article key={j.user_id} className="surface-card hover-lift rounded-2xl p-5">
             <div className="flex min-w-0 items-center gap-3">
               <Avatar name={j.name} />
               <div className="min-w-0">
                 <p className="truncate font-medium">{j.name}</p>
-                <p className="truncate text-xs text-muted-foreground">{j.organization}</p>
+                <p className="truncate text-xs text-muted-foreground">{j.college ?? "Judge"}</p>
               </div>
             </div>
             <p className="mt-3 flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground">
@@ -126,7 +148,10 @@ function AdminJudges() {
                 </dd>
               </div>
             </dl>
-            <Progress value={(j.evaluated / j.assigned) * 100} className="mt-4 h-2" />
+            <Progress
+              value={j.assigned ? (j.evaluated / j.assigned) * 100 : 0}
+              className="mt-4 h-2"
+            />
           </article>
         ))}
       </div>
@@ -134,27 +159,18 @@ function AdminJudges() {
       <section className="surface-card rounded-2xl p-6">
         <h2 className="font-display text-lg font-semibold">Assign a submission</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Pick a judge, a hackathon and the submission they should evaluate.
+          Pick a judge and the submission they should evaluate.
         </p>
-        <div className="mt-5 grid gap-4 lg:grid-cols-4">
+        <div className="mt-5 grid gap-4 lg:grid-cols-3">
           <div className="space-y-2">
             <Label>Judge</Label>
             <Select value={judgeId} onValueChange={setJudgeId}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                {mockJudges.map((j) => (
-                  <SelectItem key={j.id} value={j.id}>{j.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label>Hackathon</Label>
-            <Select value={hackathonId} onValueChange={setHackathonId}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {hackathons.map((h) => (
-                  <SelectItem key={h.id} value={h.id}>{h.name}</SelectItem>
+                {judges.map((j) => (
+                  <SelectItem key={j.user_id} value={String(j.user_id)}>
+                    {j.name}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -176,14 +192,23 @@ function AdminJudges() {
             <Button
               className="w-full"
               onClick={async () => {
-                await evaluationService.assign({ judgeId, hackathonId, submissionId });
-                toast.success("Submission assigned (demo)");
+                try {
+                  await evaluationService.assign({ judgeId, submissionId });
+                  toast.success("Submission assigned");
+                } catch (error) {
+                  toast.error(error instanceof Error ? error.message : "Assign failed");
+                }
               }}
             >
               Assign
             </Button>
           </div>
         </div>
+        {hackathons.length > 0 && (
+          <p className="mt-3 text-xs text-muted-foreground">
+            {hackathons.length} hackathons on the platform
+          </p>
+        )}
       </section>
     </>
   );

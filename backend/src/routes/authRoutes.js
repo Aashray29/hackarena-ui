@@ -3,7 +3,9 @@ const express = require("express");
 const {
     registerUser,
     loginUser,
-    getCurrentUser
+    getCurrentUser,
+    updateProfile,
+    getAllParticipants
 } = require("../controllers/authController");
 const {
     authenticate,
@@ -17,6 +19,16 @@ router.post("/register", registerUser);
 router.post("/login", loginUser);
 
 router.get("/me", authenticate, getCurrentUser);
+
+router.put("/profile", authenticate, updateProfile);
+
+router.get(
+    "/participants",
+    authenticate,
+    authorize("admin"),
+    getAllParticipants
+);
+
 router.get(
     "/admin-test",
     authenticate,

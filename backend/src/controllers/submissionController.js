@@ -186,8 +186,144 @@ const getSubmissionById = async (req, res) => {
     }
 };
 
+// ============================================
+// GET MY SUBMISSION
+// ============================================
+
+const getMySubmission = async (req, res) => {
+    try {
+        const userId = req.user.userId;
+        const { hackathon_id } = req.query;
+
+        let query = `
+            SELECT
+                s.submission_id,
+                s.team_id,
+                s.project_name,
+                s.description,
+                s.github_url,
+                s.demo_url,
+                s.technologies,
+                s.submitted_at,
+                s.updated_at,
+                t.team_name,
+                t.leader_id,
+                t.hackathon_id,
+                h.name AS hackathon_name,
+                CASE
+                    WHEN EXISTS (
+                        SELECT 1 FROM evaluations e
+                        JOIN judge_assignments ja ON e.assignment_id = ja.assignment_id
+                        WHERE ja.submission_id = s.submission_id
+                    ) THEN 'Evaluated'
+                    WHEN EXISTS (
+                        SELECT 1 FROM judge_assignments ja
+                        WHERE ja.submission_id = s.submission_id
+                    ) THEN 'In Review'
+                    ELSE 'Pending'
+                END AS evaluation_status
+             FROM submissions s
+             JOIN teams t ON s.team_id = t.team_id
+             JOIN hackathons h ON t.hackathon_id = h.hackathon_id
+             JOIN team_members tm ON tm.team_id = t.team_id
+             WHERE tm.user_id = ?
+        `;
+
+        const params = [userId];
+
+        if (hackathon_id) {
+            query += " AND t.hackathon_id = ?";
+            params.push(hackathon_id);
+        }
+
+        query += " ORDER BY s.submitted_at DESC LIMIT 1";
+
+        const [submissions] = await pool.query(query, params);
+
+        if (submissions.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "Submission not found"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            data: submissions[0]
+        });
+
+    } catch (error) {
+        console.error("Get my submission error:", error.message);
+
+        res.status(500).json({
+            success: false,
+            message: "Failed to fetch submission"
+        });
+    }
+};
+
+// ============================================
+// GET ALL SUBMISSIONS
+// ============================================
+
+const getAllSubmissions = async (req, res) => {
+    try {
+        const [submissions] = await pool.query(
+            `SELECT
+                s.submission_id,
+                s.team_id,
+                s.project_name,
+                s.description,
+                s.github_url,
+                s.demo_url,
+                s.technologies,
+                s.submitted_at,
+                t.team_name,
+                t.hackathon_id,
+                h.name AS hackathon_name,
+                CASE
+                    WHEN EXISTS (
+                        SELECT 1 FROM evaluations e
+                        JOIN judge_assignments ja ON e.assignment_id = ja.assignment_id
+                        WHERE ja.submission_id = s.submission_id
+                    ) THEN 'Evaluated'
+                    WHEN EXISTS (
+                        SELECT 1 FROM judge_assignments ja
+                        WHERE ja.submission_id = s.submission_id
+                    ) THEN 'In Review'
+                    ELSE 'Pending'
+                END AS evaluation_status,
+                (
+                    SELECT ROUND(AVG(e.total_score), 0)
+                    FROM evaluations e
+                    JOIN judge_assignments ja ON e.assignment_id = ja.assignment_id
+                    WHERE ja.submission_id = s.submission_id
+                ) AS average_score
+             FROM submissions s
+             JOIN teams t ON s.team_id = t.team_id
+             JOIN hackathons h ON t.hackathon_id = h.hackathon_id
+             ORDER BY s.submitted_at DESC`
+        );
+
+        res.status(200).json({
+            success: true,
+            count: submissions.length,
+            data: submissions
+        });
+
+    } catch (error) {
+        console.error("Get all submissions error:", error.message);
+
+        res.status(500).json({
+            success: false,
+            message: "Failed to fetch submissions"
+        });
+    }
+};
 
 module.exports = {
     createSubmission,
-    getSubmissionById
+    getSubmissionById,
+    getMySubmission,
+    getAllSubmissions
 };

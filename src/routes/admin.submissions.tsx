@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Eye, Github, ExternalLink, ClipboardList } from "lucide-react";
 import { toast } from "sonner";
@@ -14,21 +15,34 @@ import {
 } from "@/components/ui/table";
 import { formatDate } from "@/lib/format";
 import { submissionService } from "@/services/submissionService";
+import type { Submission } from "@/types";
 
 export const Route = createFileRoute("/admin/submissions")({
-  head: () => ({
-    meta: [
-      { title: "Submissions — HackArena Admin" },
-      { name: "description", content: "Review project submissions, repositories, demos and scores." },
-      { property: "og:title", content: "Submissions — HackArena Admin" },
-      { property: "og:description", content: "Submission tracking for organisers." },
-    ],
-  }),
   component: AdminSubmissions,
 });
 
 function AdminSubmissions() {
-  const submissions = submissionService.list();
+  const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadSubmissions = async () => {
+      try {
+        const data = await submissionService.list();
+        setSubmissions(data);
+      } catch (error) {
+        console.error("Failed to load submissions:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadSubmissions();
+  }, []);
+
+  if (loading) {
+    return <div className="p-6 text-muted-foreground">Loading submissions...</div>;
+  }
 
   return (
     <>
@@ -67,25 +81,29 @@ function AdminSubmissions() {
                         size="icon"
                         variant="ghost"
                         aria-label="View submission"
-                        onClick={() => toast.info(`Opening ${s.projectName} (demo)`)}
+                        onClick={() => toast.info(`Opening ${s.projectName}`)}
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
-                      <Button asChild size="icon" variant="ghost" aria-label="View GitHub">
-                        <a href={s.githubUrl} target="_blank" rel="noreferrer">
-                          <Github className="h-4 w-4" />
-                        </a>
-                      </Button>
-                      <Button asChild size="icon" variant="ghost" aria-label="View demo">
-                        <a href={s.demoUrl} target="_blank" rel="noreferrer">
-                          <ExternalLink className="h-4 w-4" />
-                        </a>
-                      </Button>
+                      {s.githubUrl && (
+                        <Button asChild size="icon" variant="ghost" aria-label="View GitHub">
+                          <a href={s.githubUrl} target="_blank" rel="noreferrer">
+                            <Github className="h-4 w-4" />
+                          </a>
+                        </Button>
+                      )}
+                      {s.demoUrl && (
+                        <Button asChild size="icon" variant="ghost" aria-label="View demo">
+                          <a href={s.demoUrl} target="_blank" rel="noreferrer">
+                            <ExternalLink className="h-4 w-4" />
+                          </a>
+                        </Button>
+                      )}
                       <Button
                         size="icon"
                         variant="ghost"
                         aria-label="View evaluation"
-                        onClick={() => toast.info(`Evaluation for ${s.projectName} (demo)`)}
+                        onClick={() => toast.info(`Evaluation for ${s.projectName}`)}
                       >
                         <ClipboardList className="h-4 w-4" />
                       </Button>

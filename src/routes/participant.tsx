@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { DashboardLayout, type NavItem } from "@/components/layout/DashboardLayout";
 import { authService } from "@/services/authService";
-
+import { requireAuth } from "@/lib/authGuard";
 
 const items: NavItem[] = [
   { label: "Dashboard", to: "/participant", icon: LayoutDashboard, exact: true },
@@ -24,6 +24,7 @@ const items: NavItem[] = [
 
 
 export const Route = createFileRoute("/participant")({
+  beforeLoad: () => requireAuth("participant"),
   component: ParticipantLayout,
 });
 

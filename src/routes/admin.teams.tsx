@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Eye, Trash2, Users } from "lucide-react";
 import { toast } from "sonner";
@@ -25,20 +25,32 @@ import { teamService } from "@/services/teamService";
 import type { Team } from "@/types";
 
 export const Route = createFileRoute("/admin/teams")({
-  head: () => ({
-    meta: [
-      { title: "Teams — HackArena Admin" },
-      { name: "description", content: "Review every team, its leader, members and submission status." },
-      { property: "og:title", content: "Teams — HackArena Admin" },
-      { property: "og:description", content: "Team management for organisers." },
-    ],
-  }),
   component: AdminTeams,
 });
 
 function AdminTeams() {
-  const teams = teamService.list();
+  const [teams, setTeams] = useState<Team[]>([]);
   const [selected, setSelected] = useState<Team | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const loadTeams = async () => {
+    try {
+      const data = await teamService.list();
+      setTeams(data);
+    } catch (error) {
+      console.error("Failed to load teams:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadTeams();
+  }, []);
+
+  if (loading) {
+    return <div className="p-6 text-muted-foreground">Loading teams...</div>;
+  }
 
   return (
     <>
@@ -64,7 +76,7 @@ function AdminTeams() {
                   <TableCell className="text-muted-foreground">{t.hackathonName}</TableCell>
                   <TableCell className="text-muted-foreground">{t.leader}</TableCell>
                   <TableCell className="text-muted-foreground">
-                    {t.members.length}/{t.maxMembers}
+                    {t.memberCount ?? t.members.length}/{t.maxMembers}
                   </TableCell>
                   <TableCell><StatusBadge status={t.submissionStatus} /></TableCell>
                   <TableCell>
@@ -72,17 +84,19 @@ function AdminTeams() {
                       <Button size="sm" variant="ghost" onClick={() => setSelected(t)}>
                         <Eye className="mr-1.5 h-4 w-4" /> View
                       </Button>
-                      <Button size="sm" variant="ghost" onClick={() => setSelected(t)}>
-                        <Users className="mr-1.5 h-4 w-4" /> Members
-                      </Button>
                       <Button
                         size="icon"
                         variant="ghost"
                         aria-label="Remove team"
                         className="text-destructive hover:bg-destructive/10 hover:text-destructive"
                         onClick={async () => {
-                          await teamService.remove(t.id);
-                          toast.error(`${t.name} removed (demo)`);
+                          try {
+                            await teamService.remove(t.id);
+                            toast.success(`${t.name} removed`);
+                            await loadTeams();
+                          } catch (error) {
+                            toast.error(error instanceof Error ? error.message : "Remove failed");
+                          }
                         }}
                       >
                         <Trash2 className="h-4 w-4" />
@@ -121,6 +135,9 @@ function AdminTeams() {
                 />
               </li>
             ))}
+            {selected?.members.length === 0 && (
+              <li className="text-sm text-muted-foreground">No member details loaded.</li>
+            )}
           </ul>
         </DialogContent>
       </Dialog>

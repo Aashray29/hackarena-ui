@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authService } from "@/services/authService";
+import { getDashboardForRole } from "@/lib/roles";
 
 export const Route = createFileRoute("/register")({
   head: () => ({
@@ -46,7 +47,8 @@ function RegisterPage() {
         </div>
         <h1 className="mt-6 text-center font-display text-2xl font-bold">Create your account</h1>
         <p className="mt-1.5 text-center text-sm text-muted-foreground">
-          One profile for every hackathon you join.
+          New accounts are created as <strong>Participants</strong>. Admin and Judge access is
+          assigned separately in the database.
         </p>
 
         <form
@@ -57,9 +59,19 @@ function RegisterPage() {
               toast.error("Passwords do not match");
               return;
             }
-            await authService.register(form);
-            toast.success("Account created (demo) — opening your dashboard");
-            navigate({ to: "/participant" });
+            try {
+              await authService.register(form);
+              const loginData = await authService.login(
+                form["email"] ?? "",
+                form["password"] ?? "",
+              );
+              toast.success("Participant account created!");
+              navigate({ to: getDashboardForRole(loginData.user.role) });
+            } catch (error) {
+              toast.error(
+                error instanceof Error ? error.message : "Registration failed",
+              );
+            }
           }}
         >
           {fields.map((f) => (

@@ -54,6 +54,7 @@ export interface Team {
   hackathonName: string;
   leader: string;
   members: TeamMember[];
+  memberCount?: number;
   maxMembers: number;
   requiredSkills: string[];
   lookingForMembers: boolean;

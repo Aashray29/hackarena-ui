@@ -1,14 +1,23 @@
 import type { Team } from "@/types";
+import { mapTeam, type BackendTeam } from "@/lib/mappers";
 import { apiClient } from "./apiClient";
 
 export const teamService = {
-  async getMyTeam(): Promise<Team | null> {
-    const data = await apiClient.get<{
-      success: boolean;
-      data: Team | null;
-    }>("/teams/my");
+  async getMyTeam(hackathonId?: string): Promise<Team | null> {
+    try {
+      const endpoint = hackathonId
+        ? `/teams/my?hackathon_id=${hackathonId}`
+        : "/teams/my";
 
-    return data.data;
+      const data = await apiClient.get<{
+        success: boolean;
+        data: BackendTeam;
+      }>(endpoint);
+
+      return mapTeam(data.data);
+    } catch {
+      return null;
+    }
   },
 
   async list(hackathonId?: string): Promise<Team[]> {
@@ -18,16 +27,19 @@ export const teamService = {
 
     const data = await apiClient.get<{
       success: boolean;
-      data: Team[];
+      data: BackendTeam[];
     }>(endpoint);
 
-    return data.data;
+    return data.data.map((team) => mapTeam(team));
   },
 
   async getById(teamId: string) {
-    const data = await apiClient.get(`/teams/${teamId}`);
+    const data = await apiClient.get<{
+      success: boolean;
+      data: BackendTeam;
+    }>(`/teams/${teamId}`);
 
-    return data.data;
+    return mapTeam(data.data);
   },
 
   async create(payload: {
@@ -45,19 +57,15 @@ export const teamService = {
     return apiClient.delete(`/teams/${teamId}/leave`);
   },
 
-  async invite(teamId: string, userId: number) {
-    return apiClient.post(`/teams/${teamId}/invite`, {
-      user_id: userId,
-    });
+  async invite(teamId: string, email: string) {
+    return apiClient.post(`/teams/${teamId}/invite`, { email });
   },
 
-  async removeMember(teamId: string, userId: number) {
-    return apiClient.delete(
-      `/teams/${teamId}/members/${userId}`,
-    );
+  async remove(teamId: string) {
+    return apiClient.delete(`/teams/${teamId}`);
   },
 
   async requestToJoin(teamId: string) {
-    return apiClient.post(`/teams/${teamId}/requests`);
+    return apiClient.post(`/teams/${teamId}/join`);
   },
 };

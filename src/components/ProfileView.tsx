@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Pencil, Save, X } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/PageHeader";
@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { StatusBadge } from "@/components/StatusBadge";
-import { authService, type DemoProfile } from "@/services/authService";
+import { authService, type UserProfile } from "@/services/authService";
 import type { Role } from "@/types";
 
 const roleLabels: Record<Role, string> = {
@@ -16,17 +16,61 @@ const roleLabels: Record<Role, string> = {
   judge: "Judge",
 };
 
-export function ProfileView({ role }: { role: Role }) {
-  const [profile, setProfile] = useState<DemoProfile>(() => authService.getDemoProfile(role));
-  const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState<DemoProfile>(profile);
+type ProfileFields = Pick<UserProfile, "name" | "email" | "college" | "phone">;
 
-  const fields: { key: keyof DemoProfile; label: string; type?: string }[] = [
+export function ProfileView({ role }: { role: Role }) {
+  const [profile, setProfile] = useState<ProfileFields | null>(null);
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState<ProfileFields>({
+    name: "",
+    email: "",
+    college: "",
+    phone: "",
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        const user = await authService.getMe();
+        const fields: ProfileFields = {
+          name: user.name,
+          email: user.email,
+          college: user.college ?? "",
+          phone: user.phone ?? "",
+        };
+        setProfile(fields);
+        setDraft(fields);
+      } catch {
+        const cached = authService.getUser();
+        if (cached) {
+          const fields: ProfileFields = {
+            name: cached.name,
+            email: cached.email,
+            college: cached.college ?? "",
+            phone: cached.phone ?? "",
+          };
+          setProfile(fields);
+          setDraft(fields);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProfile();
+  }, []);
+
+  const fields: { key: keyof ProfileFields; label: string; type?: string; readOnly?: boolean }[] = [
     { key: "name", label: "Full name" },
-    { key: "email", label: "Email", type: "email" },
+    { key: "email", label: "Email", type: "email", readOnly: true },
     { key: "college", label: role === "judge" ? "Organisation" : "College" },
     { key: "phone", label: "Phone", type: "tel" },
   ];
+
+  if (loading || !profile) {
+    return <div className="p-6 text-muted-foreground">Loading profile...</div>;
+  }
 
   return (
     <>
@@ -47,10 +91,20 @@ export function ProfileView({ role }: { role: Role }) {
               </Button>
               <Button
                 onClick={async () => {
-                  await authService.updateProfile(draft);
-                  setProfile(draft);
-                  setEditing(false);
-                  toast.success("Profile updated (demo)");
+                  try {
+                    await authService.updateProfile({
+                      name: draft.name,
+                      college: draft.college ?? "",
+                      phone: draft.phone ?? "",
+                    });
+                    setProfile(draft);
+                    setEditing(false);
+                    toast.success("Profile updated");
+                  } catch (error) {
+                    toast.error(
+                      error instanceof Error ? error.message : "Update failed",
+                    );
+                  }
                 }}
               >
                 <Save className="mr-1.5 h-4 w-4" /> Save changes
@@ -82,16 +136,18 @@ export function ProfileView({ role }: { role: Role }) {
             {fields.map((f) => (
               <div key={f.key} className="space-y-2">
                 <Label htmlFor={f.key}>{f.label}</Label>
-                {editing ? (
+                {editing && !f.readOnly ? (
                   <Input
                     id={f.key}
                     type={f.type ?? "text"}
-                    value={draft[f.key]}
-                    onChange={(e) => setDraft((s) => ({ ...s, [f.key]: e.target.value }))}
+                    value={draft[f.key] ?? ""}
+                    onChange={(e) =>
+                      setDraft((s) => ({ ...s, [f.key]: e.target.value }))
+                    }
                   />
                 ) : (
                   <p className="truncate rounded-lg border border-border bg-background/40 px-3 py-2.5 text-sm">
-                    {profile[f.key]}
+                    {profile[f.key] || "—"}
                   </p>
                 )}
               </div>

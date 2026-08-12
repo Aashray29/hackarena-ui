@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Crown, Medal, Award } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
@@ -12,16 +13,9 @@ import {
 } from "@/components/ui/table";
 import { evaluationService } from "@/services/evaluationService";
 import { cn } from "@/lib/utils";
+import type { Evaluation, LeaderboardEntry } from "@/types";
 
 export const Route = createFileRoute("/admin/results")({
-  head: () => ({
-    meta: [
-      { title: "Results — HackArena Admin" },
-      { name: "description", content: "Published results and rankings across all hackathons." },
-      { property: "og:title", content: "Results — HackArena Admin" },
-      { property: "og:description", content: "Final rankings and scores." },
-    ],
-  }),
   component: AdminResults,
 });
 
@@ -29,8 +23,32 @@ const icons = [Crown, Medal, Award];
 const tones = ["text-gold", "text-silver", "text-bronze"];
 
 function AdminResults() {
-  const entries = evaluationService.leaderboard();
-  const evaluations = evaluationService.list();
+  const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
+  const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [leaderboard, evaluationList] = await Promise.all([
+          evaluationService.leaderboard(),
+          evaluationService.list(),
+        ]);
+        setEntries(leaderboard);
+        setEvaluations(evaluationList);
+      } catch (error) {
+        console.error("Failed to load results:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  if (loading) {
+    return <div className="p-6 text-muted-foreground">Loading results...</div>;
+  }
 
   return (
     <>

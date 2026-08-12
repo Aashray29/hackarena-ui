@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Search, Github, ExternalLink } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
@@ -12,24 +12,35 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { submissionService } from "@/services/submissionService";
+import { evaluationService } from "@/services/evaluationService";
+import type { Submission } from "@/types";
+
+type AssignedSubmission = Submission & { assignmentId: string };
 
 export const Route = createFileRoute("/judge/assigned")({
-  head: () => ({
-    meta: [
-      { title: "Assigned Projects — HackArena Judge" },
-      { name: "description", content: "Browse and evaluate the projects assigned to you." },
-      { property: "og:title", content: "Assigned Projects — HackArena Judge" },
-      { property: "og:description", content: "Judge evaluation queue." },
-    ],
-  }),
   component: JudgeAssigned,
 });
 
 function JudgeAssigned() {
-  const submissions = submissionService.list();
+  const [submissions, setSubmissions] = useState<AssignedSubmission[]>([]);
+  const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("all");
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const data = await evaluationService.getMyAssignments();
+        setSubmissions(data);
+      } catch (error) {
+        console.error("Failed to load assignments:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
 
   const rows = useMemo(
     () =>
@@ -41,6 +52,10 @@ function JudgeAssigned() {
       ),
     [submissions, query, status],
   );
+
+  if (loading) {
+    return <div className="p-6 text-muted-foreground">Loading assignments...</div>;
+  }
 
   return (
     <>
@@ -83,7 +98,7 @@ function JudgeAssigned() {
             <p className="mt-3 line-clamp-3 text-sm text-muted-foreground">{s.description}</p>
 
             <div className="mt-4 flex flex-wrap gap-2">
-              {s.technologies.map((t: string) => (
+              {s.technologies.map((t) => (
                 <span
                   key={t}
                   className="rounded-full border border-border bg-muted px-2.5 py-1 text-xs text-muted-foreground"
@@ -94,16 +109,20 @@ function JudgeAssigned() {
             </div>
 
             <div className="mt-5 flex flex-wrap gap-2">
-              <Button asChild size="sm" variant="secondary">
-                <a href={s.githubUrl} target="_blank" rel="noreferrer">
-                  <Github className="mr-1.5 h-4 w-4" /> Repo
-                </a>
-              </Button>
-              <Button asChild size="sm" variant="secondary">
-                <a href={s.demoUrl} target="_blank" rel="noreferrer">
-                  <ExternalLink className="mr-1.5 h-4 w-4" /> Demo
-                </a>
-              </Button>
+              {s.githubUrl && (
+                <Button asChild size="sm" variant="secondary">
+                  <a href={s.githubUrl} target="_blank" rel="noreferrer">
+                    <Github className="mr-1.5 h-4 w-4" /> Repo
+                  </a>
+                </Button>
+              )}
+              {s.demoUrl && (
+                <Button asChild size="sm" variant="secondary">
+                  <a href={s.demoUrl} target="_blank" rel="noreferrer">
+                    <ExternalLink className="mr-1.5 h-4 w-4" /> Demo
+                  </a>
+                </Button>
+              )}
               <Button asChild size="sm" className="ml-auto">
                 <Link to="/judge/evaluation/$submissionId" params={{ submissionId: s.id }}>
                   {s.evaluationStatus === "Evaluated" ? "View evaluation" : "Evaluate"}

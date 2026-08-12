@@ -3,33 +3,53 @@ const express = require("express");
 const {
     createEvaluation,
     getEvaluationById,
-    getLeaderboard
+    getLeaderboard,
+    getAllEvaluations,
+    getMyResults,
+    getCombinedLeaderboard
 } = require("../controllers/evaluationController");
 
 const {
-    authenticate
+    authenticate,
+    authorize
 } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
+router.get(
+    "/leaderboard",
+    getCombinedLeaderboard
+);
 
-// JUDGE - CREATE EVALUATION
+router.get(
+    "/my",
+    authenticate,
+    getMyResults
+);
+
+router.get(
+    "/",
+    authenticate,
+    authorize("admin"),
+    getAllEvaluations
+);
+
 router.post(
     "/",
     authenticate,
+    authorize("judge"),
     createEvaluation
 );
-// GET EVALUATION
+
+router.get(
+    "/hackathon/:id/leaderboard",
+    getLeaderboard
+);
+
 router.get(
     "/:id",
     authenticate,
     getEvaluationById
 );
-router.get(
-    "/hackathon/:id/leaderboard",
-    authenticate,
-    getLeaderboard
-);
-
 
 module.exports = router;
