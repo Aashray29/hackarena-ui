@@ -47,12 +47,29 @@ function LoginPage() {
 
         <form
           className="mt-7 space-y-4"
-          onSubmit={async (e) => {
-            e.preventDefault();
-            await authService.login(email, password);
-            toast.success("Signed in (demo) — opening participant workspace");
-            navigate({ to: "/participant" });
-          }}
+              onSubmit={async (e) => {
+                      e.preventDefault();
+
+                      try {
+                        const data = await authService.login(email, password);
+
+                        toast.success("Login successful");
+
+                        if (data.user?.role === "admin") {
+                          navigate({ to: "/admin" });
+                        } else if (data.user?.role === "judge") {
+                          navigate({ to: "/judge" });
+                        } else {
+                          navigate({ to: "/participant" });
+                        }
+                      } catch (error) {
+                        toast.error(
+                          error instanceof Error
+                            ? error.message
+                            : "Invalid email or password"
+        );
+      }
+    }}
         >
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>

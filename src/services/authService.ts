@@ -1,46 +1,75 @@
-import { currentAdmin, currentJudge, currentParticipant } from "@/data/mockUsers";
 import type { Role } from "@/types";
-import { delay } from "./apiClient";
 
-export interface DemoProfile {
-  id: string;
+const API_URL = "http://localhost:5000/api";
+
+export interface UserProfile {
+  user_id: number;
   name: string;
   email: string;
-  college: string;
-  phone: string;
   role: Role;
 }
 
-/** No real authentication — these helpers only return mock profiles. */
+interface LoginResponse {
+  success: boolean;
+  message: string;
+  token?: string;
+  user?: UserProfile;
+}
+
 export const authService = {
-  getDemoProfile(role: Role): DemoProfile {
-    if (role === "admin") return currentAdmin;
-    if (role === "judge") {
-      return {
-        id: currentJudge.id,
-        name: currentJudge.name,
-        email: currentJudge.email,
-        college: currentJudge.organization,
-        phone: "+91 98400 55512",
-        role: "judge",
-      };
+  async login(email: string, password: string) {
+    const response = await fetch(`${API_URL}/auth/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email,
+        password,
+      }),
+    });
+
+    const data: LoginResponse = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || "Invalid email or password");
     }
-    return {
-      id: currentParticipant.id,
-      name: currentParticipant.name,
-      email: currentParticipant.email,
-      college: currentParticipant.college,
-      phone: currentParticipant.phone,
-      role: "participant",
-    };
+
+    if (data.token) {
+      localStorage.setItem("token", data.token);
+    }
+
+    if (data.user) {
+      localStorage.setItem("user", JSON.stringify(data.user));
+    }
+
+    return data;
   },
-  login(email: string, _password: string) {
-    return delay({ ok: true, email });
+
+  logout() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
   },
-  register(payload: Record<string, string>) {
-    return delay({ ok: true, payload });
+
+  getToken() {
+    return localStorage.getItem("token");
   },
-  updateProfile(payload: Partial<DemoProfile>) {
-    return delay({ ok: true, payload });
+
+  getUser(): UserProfile | null {
+    const user = localStorage.getItem("user");
+
+    if (!user) {
+      return null;
+    }
+
+    try {
+      return JSON.parse(user);
+    } catch {
+      return null;
+    }
+  },
+
+  isLoggedIn() {
+    return !!localStorage.getItem("token");
   },
 };

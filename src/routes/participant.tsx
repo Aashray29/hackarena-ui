@@ -9,7 +9,8 @@ import {
   User,
 } from "lucide-react";
 import { DashboardLayout, type NavItem } from "@/components/layout/DashboardLayout";
-import { currentParticipant } from "@/data/mockUsers";
+import { authService } from "@/services/authService";
+
 
 const items: NavItem[] = [
   { label: "Dashboard", to: "/participant", icon: LayoutDashboard, exact: true },
@@ -21,17 +22,21 @@ const items: NavItem[] = [
   { label: "Profile", to: "/participant/profile", icon: User },
 ];
 
+
 export const Route = createFileRoute("/participant")({
   component: ParticipantLayout,
 });
 
+
 function ParticipantLayout() {
+  const user = authService.getUser();
+
   return (
     <DashboardLayout
       items={items}
       roleLabel="Participant"
-      userName={currentParticipant.name}
-      userMeta={currentParticipant.college}
+      userName={user?.name || "Participant"}
+      userMeta={user?.email || ""}
     >
       <Outlet />
     </DashboardLayout>
